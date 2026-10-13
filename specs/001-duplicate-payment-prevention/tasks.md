@@ -60,16 +60,16 @@ description: "Task list for 이중 결제 방지 실험"
 
 ### Tests for User Story 1
 
-- [ ] T014 [P] [US1] 동시성 테스트: 100개 동시 알림 × 10회 반복, 매회 승인 1건·「이미 처리됨」 99개·오류 0개 (SC-001·002) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/ConditionalUpdateConcurrencyTest.kt`
-- [ ] T015 [P] [US1] 엣지 케이스 테스트: 이미 승인된 결제 재알림, 없는 결제(404 `PAYMENT_NOT_FOUND`), 금액 불일치(422 `AMOUNT_MISMATCH`), 승인·실패 알림 동시 도착 시 결과 하나만 반영, 「확인 필요」 결제의 승인 in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/CallbackEdgeCaseTest.kt`
-- [ ] T016 [P] [US1] 반쪽 반영 없음 테스트: 「상태 변경 후, 승인 기록 저장 전」에 오류를 주입하면 결제 상태와 승인 기록이 둘 다 바뀌지 않음 (FR-006, research R10) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/AtomicityTest.kt`
+- [X] T014 [P] [US1] 동시성 테스트: 100개 동시 알림 × 10회 반복, 매회 승인 1건·「이미 처리됨」 99개·오류 0개 (SC-001·002) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/ConditionalUpdateConcurrencyTest.kt`
+- [X] T015 [P] [US1] 엣지 케이스 테스트: 이미 승인된 결제 재알림, 없는 결제(404 `PAYMENT_NOT_FOUND`), 금액 불일치(422 `AMOUNT_MISMATCH`), 승인·실패 알림 동시 도착 시 결과 하나만 반영, 「확인 필요」 결제의 승인 in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/CallbackEdgeCaseTest.kt`
+- [X] T016 [P] [US1] 반쪽 반영 없음 테스트: 「상태 변경 후, 승인 기록 저장 전」에 오류를 주입하면 결제 상태와 승인 기록이 둘 다 바뀌지 않음 (FR-006, research R10) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/AtomicityTest.kt`
 
 ### Implementation for User Story 1
 
-- [ ] T017 [P] [US1] 콜백 요청·결과 타입 (`CallbackRequest`, `CallbackResult`: `APPROVED`·`FAILED`·`ALREADY_PROCESSED`·`PAYMENT_NOT_FOUND`·`AMOUNT_MISMATCH`·`CONFLICT`)과 `CallbackStrategy` 인터페이스 in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/CallbackStrategy.kt`
-- [ ] T018 [P] [US1] 테스트용 오류 주입 훅 `FailureInjector` (기본 꺼짐, 테스트에서 지정한 지점에서 예외 발생) in `src/main/kotlin/io/github/yjy8501/paymentlab/support/FailureInjector.kt`
-- [ ] T019 [US1] 방식 ④ `ConditionalUpdateStrategy` (조건부 전이 1행일 때만 `approval` 저장, 0행이면 `ALREADY_PROCESSED`, 한 트랜잭션, 오류 주입 지점 포함) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/ConditionalUpdateStrategy.kt`
-- [ ] T020 [US1] 콜백 API `POST /callbacks/{strategy}` (결과 → HTTP 상태 매핑은 contracts/http-api.md 표 그대로) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/CallbackController.kt`
+- [X] T017 [P] [US1] 콜백 요청·결과 타입 (`CallbackRequest`, `CallbackResult`: `APPROVED`·`FAILED`·`ALREADY_PROCESSED`·`PAYMENT_NOT_FOUND`·`AMOUNT_MISMATCH`·`CONFLICT`)과 `CallbackStrategy` 인터페이스 in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/CallbackStrategy.kt`
+- [X] T018 [P] [US1] 테스트용 오류 주입 훅 `FailureInjector` (기본 꺼짐, 테스트에서 지정한 지점에서 예외 발생) in `src/main/kotlin/io/github/yjy8501/paymentlab/support/FailureInjector.kt`
+- [X] T019 [US1] 방식 ④ `ConditionalUpdateStrategy` (조건부 전이 1행일 때만 `approval` 저장, 0행이면 `ALREADY_PROCESSED`, 한 트랜잭션, 오류 주입 지점 포함) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/ConditionalUpdateStrategy.kt`. 확정 로직은 US3와 함께 쓰도록 `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentSettler.kt`로 분리
+- [X] T020 [US1] 콜백 API `POST /callbacks/{strategy}` (결과 → HTTP 상태 매핑은 contracts/http-api.md 표 그대로) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/CallbackController.kt`
 
 **Checkpoint**: US1 테스트 통과 = MVP 완성
 
@@ -121,7 +121,7 @@ description: "Task list for 이중 결제 방지 실험"
 
 - [ ] T038 [P] [US3] `PgClient` 인터페이스와 결과 타입(`PgApproveResult`, `InquiryResult`: `APPROVED(pgTxId)`·`FAILED`·`NOT_FOUND`) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PgClient.kt`
 - [ ] T039 [P] [US3] `FakePg` (시나리오 설정: 바로 승인·바로 실패·지연·유실, 「응답은 유실됐지만 실제 승인됨」 기억, 거래조회 결과) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/FakePg.kt`
-- [ ] T040 [US3] 상태 확정 로직을 ④의 조건부 전이로 통일한 `PaymentResolver` (승인·실패·확인 필요 반영) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PaymentResolver.kt`
+- [ ] T040 [US3] 상태 확정 로직을 ④의 조건부 전이로 통일: T019에서 만든 `PaymentSettler`(승인·실패·확인 필요 반영)를 PG 승인 흐름에서 그대로 사용 in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentSettler.kt`
 - [ ] T041 [US3] `PaymentApprovalService` (3초 타임아웃 → `Reconciler`로 즉시 1회 + 1초 간격 2회 조회) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PaymentApprovalService.kt`
 - [ ] T042 [US3] 승인 요청 API `POST /payments/{paymentNo}/approve` in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PaymentApprovalController.kt`
 

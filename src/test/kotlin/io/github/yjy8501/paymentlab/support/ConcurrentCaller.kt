@@ -9,6 +9,9 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
+/** 보낼 요청 하나 */
+data class Call(val path: String, val json: String)
+
 /** HTTP 응답 하나 */
 data class CallResult(val status: Int, val body: String, val elapsedNanos: Long) {
 
@@ -58,16 +61,20 @@ class ConcurrentCaller(private val baseUrl: String) {
         return CallResult(response.statusCode(), response.body(), System.nanoTime() - started)
     }
 
-    fun postConcurrently(count: Int, path: String, json: String): CallStats {
-        val executor = Executors.newFixedThreadPool(count)
-        val ready = CountDownLatch(count)
+    fun postConcurrently(count: Int, path: String, json: String): CallStats =
+        postConcurrently(List(count) { Call(path, json) })
+
+    /** 서로 다른 요청을 섞어서 동시에 보낸다 (예: 승인 알림과 실패 알림) */
+    fun postConcurrently(calls: List<Call>): CallStats {
+        val executor = Executors.newFixedThreadPool(calls.size)
+        val ready = CountDownLatch(calls.size)
         val start = CountDownLatch(1)
         try {
-            val futures = (1..count).map {
+            val futures = calls.map { call ->
                 executor.submit<CallResult> {
                     ready.countDown()
                     start.await()
-                    post(path, json)
+                    post(call.path, call.json)
                 }
             }
             ready.await()
