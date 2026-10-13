@@ -1,6 +1,8 @@
 package io.github.yjy8501.paymentlab.payment
 
+import jakarta.persistence.LockModeType
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
@@ -9,6 +11,11 @@ import java.time.Instant
 interface PaymentRepository : JpaRepository<Payment, Long> {
 
     fun findByPaymentNo(paymentNo: String): Payment?
+
+    /** 방식 ⑤: 결제 행을 잠가서 읽는다 (`SELECT ... FOR UPDATE`). 다른 요청은 커밋까지 기다린다 */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select p from Payment p where p.paymentNo = :paymentNo")
+    fun findByPaymentNoForUpdate(@Param("paymentNo") paymentNo: String): Payment?
 
     /**
      * 조건부 상태 전이. 현재 상태가 [from] 중 하나일 때만 [to]로 바꾸고, 바뀐 행 수(0 또는 1)를 돌려준다.

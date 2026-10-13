@@ -83,23 +83,23 @@ description: "Task list for 이중 결제 방지 실험"
 
 ### Tests for User Story 2
 
-- [ ] T021 [P] [US2] 방식 ① 중복 재현 테스트: 10회 중 1회 이상 승인 기록 2건 이상 (US2-2, SC-004) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/ReadThenSaveConcurrencyTest.kt`
-- [ ] T022 [P] [US2] 방식 ② 테스트: 매회 승인 1건, 오류(409 `CONFLICT`) 1개 이상 (US2-3) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/OptimisticLockConcurrencyTest.kt`
-- [ ] T023 [P] [US2] 방식 ③ TTL 만료 테스트: TTL 0.1초 + 처리 지연이 TTL보다 길 때 승인 기록 2건 이상 (US2-4, SC-004) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/RedisLockExpiryTest.kt`
-- [ ] T024 [P] [US2] 방식 ⑤ 테스트: 10회 모두 승인 1건·「이미 처리됨」 99개·오류 0개 (US2-5, SC-006) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/PessimisticLockConcurrencyTest.kt`
+- [X] T021 [P] [US2] 방식 ① 중복 재현 테스트: 10회 중 1회 이상 승인 기록 2건 이상 (US2-2, SC-004) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/ReadThenSaveConcurrencyTest.kt`
+- [X] T022 [P] [US2] 방식 ② 테스트: 매회 승인 1건, 오류(409 `CONFLICT`) 1개 이상 (US2-3) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/OptimisticLockConcurrencyTest.kt`
+- [X] T023 [P] [US2] 방식 ③ TTL 만료 테스트: TTL 0.1초 + 처리 지연이 TTL보다 길 때 승인 기록 2건 이상 (US2-4, SC-004) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/RedisLockExpiryTest.kt`
+- [X] T024 [P] [US2] 방식 ⑤ 테스트: 10회 모두 승인 1건·「이미 처리됨」 99개·오류 0개 (US2-5, SC-006) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/PessimisticLockConcurrencyTest.kt`
 
 ### Implementation for User Story 2
 
-- [ ] T025 [P] [US2] 테스트용 처리 지연 훅 `ProcessingDelay` (기본 0ms, 테스트에서 설정) in `src/main/kotlin/io/github/yjy8501/paymentlab/support/ProcessingDelay.kt`
-- [ ] T026 [P] [US2] 방식 ① `ReadThenSaveStrategy` (조회 → 대기면 승인 → `approval_unguarded` 저장) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/ReadThenSaveStrategy.kt`
-- [ ] T027 [P] [US2] `VersionedPayment` 엔티티(`@Version`, 같은 `payment` 테이블)와 저장소 in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/VersionedPayment.kt`
-- [ ] T028 [US2] 방식 ② `OptimisticLockStrategy` (충돌 예외 → `CONFLICT`, 재시도 없음) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/OptimisticLockStrategy.kt`
-- [ ] T029 [P] [US2] Redis 잠금 `ExpiringLock` (`SET NX PX`로 획득, Lua로 「내 토큰일 때만 삭제」) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/ExpiringLock.kt`
-- [ ] T030 [US2] 방식 ③ `RedisLockStrategy` (잠금 실패 → 대기 없이 `CONFLICT`, 커밋 후 잠금 해제) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/RedisLockStrategy.kt`
-- [ ] T031 [US2] `PaymentRepository`에 잠금 조회 추가 (`@Lock(PESSIMISTIC_WRITE)`, `SELECT ... FOR UPDATE`) in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentRepository.kt`
-- [ ] T032 [US2] 방식 ⑤ `PessimisticLockStrategy` (잠가서 조회 → 대기면 승인 → `approval_unguarded` 저장, 이미 처리됐으면 `ALREADY_PROCESSED`) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/PessimisticLockStrategy.kt`
-- [ ] T033 [US2] 비교표 생성 테스트 `StrategyComparisonTest` (예열 1회 후 5방식 × 10회, 열: 승인 기록 수·이미 처리됨·오류·전체 처리 시간·평균 응답 시간, 측정 환경 기록 → `build/reports/comparison.md`) in `src/test/kotlin/io/github/yjy8501/paymentlab/comparison/StrategyComparisonTest.kt`
-- [ ] T034 [US2] Gradle `comparison` 태스크 등록 (기본 `test`에서는 비교표 테스트 제외) in `build.gradle.kts`
+- [X] T025 [P] [US2] 테스트용 처리 지연 훅 `ProcessingDelay` (기본 0ms, 테스트에서 설정) in `src/main/kotlin/io/github/yjy8501/paymentlab/support/ProcessingDelay.kt`
+- [X] T026 [P] [US2] 방식 ① `ReadThenSaveStrategy` (조회 → 대기면 승인 → `approval_unguarded` 저장) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/ReadThenSaveStrategy.kt`
+- [X] T027 [P] [US2] `VersionedPayment` 엔티티(`@Version`, 같은 `payment` 테이블)와 저장소 in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/VersionedPayment.kt`
+- [X] T028 [US2] 방식 ② `OptimisticLockStrategy` (충돌 예외 → `CONFLICT`, 재시도 없음) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/OptimisticLockStrategy.kt`
+- [X] T029 [P] [US2] Redis 잠금 `ExpiringLock` (`SET NX PX`로 획득, Lua로 「내 토큰일 때만 삭제」) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/ExpiringLock.kt`
+- [X] T030 [US2] 방식 ③ `RedisLockStrategy` (잠금 실패 → 대기 없이 `CONFLICT`, 커밋 후 잠금 해제) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/RedisLockStrategy.kt`
+- [X] T031 [US2] `PaymentRepository`에 잠금 조회 추가 (`@Lock(PESSIMISTIC_WRITE)`, `SELECT ... FOR UPDATE`) in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentRepository.kt`
+- [X] T032 [US2] 방식 ⑤ `PessimisticLockStrategy` (잠가서 조회 → 대기면 승인 → `approval_unguarded` 저장, 이미 처리됐으면 `ALREADY_PROCESSED`) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/PessimisticLockStrategy.kt`
+- [X] T033 [US2] 비교표 생성 테스트 `StrategyComparisonTest` (예열 1회 후 5방식 × 10회, 열: 승인 기록 수·이미 처리됨·오류·전체 처리 시간·평균 응답 시간, 측정 환경 기록 → `build/reports/comparison.md`) in `src/test/kotlin/io/github/yjy8501/paymentlab/comparison/StrategyComparisonTest.kt`
+- [X] T034 [US2] Gradle `comparison` 태스크 등록 (기본 `test`에서는 비교표 테스트 제외) in `build.gradle.kts`
 
 **Checkpoint**: `./gradlew comparison`으로 비교표가 생성된다
 

@@ -49,6 +49,20 @@ allOpen {
     annotation("jakarta.persistence.Embeddable")
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
+tasks.test {
+    useJUnitPlatform {
+        excludeTags("comparison")
+    }
+}
+
+// 다섯 방식 비교표 생성: build/reports/comparison.md (research R9)
+val comparison by tasks.registering(Test::class) {
+    description = "Runs every callback strategy under the same load and writes build/reports/comparison.md"
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    useJUnitPlatform {
+        includeTags("comparison")
+    }
+    outputs.upToDateWhen { false }
 }
