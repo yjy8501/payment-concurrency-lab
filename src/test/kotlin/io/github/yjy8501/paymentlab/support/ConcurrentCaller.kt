@@ -16,11 +16,11 @@ data class Call(val path: String, val json: String)
 data class CallResult(val status: Int, val body: String, val elapsedNanos: Long) {
 
     /** 응답 body의 "result" 값. 없으면 null */
-    val result: String? = RESULT_PATTERN.find(body)?.groupValues?.get(1)
+    val result: String? = field("result")
 
-    private companion object {
-        val RESULT_PATTERN = Regex("\"result\"\\s*:\\s*\"(\\w+)\"")
-    }
+    /** 응답 body에서 문자열 필드 하나를 꺼낸다. 없으면 null */
+    fun field(name: String): String? =
+        Regex("\"$name\"\\s*:\\s*\"(\\w+)\"").find(body)?.groupValues?.get(1)
 }
 
 /** 동시 요청 묶음의 결과 */

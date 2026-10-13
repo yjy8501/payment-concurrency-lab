@@ -113,17 +113,17 @@ description: "Task list for 이중 결제 방지 실험"
 
 ### Tests for User Story 3
 
-- [ ] T035 [P] [US3] PG 정상 응답 테스트: 바로 승인 → `APPROVED`(`PG_RESPONSE`), 바로 실패 → `FAILED`(`PG_RESPONSE`) (US3-1·2) in `src/test/kotlin/io/github/yjy8501/paymentlab/pg/PgApprovalTest.kt`
-- [ ] T036 [P] [US3] 타임아웃·거래조회 테스트: 조회 결과 승인 → `APPROVED`(`INQUIRY`), 실패 → `FAILED`, 3회 모두 결과 없음 → `NEEDS_REVIEW`(`UNRESOLVED`), 승인 요청 후 약 5초 안에 확정 (US3-3~5, SC-005) in `src/test/kotlin/io/github/yjy8501/paymentlab/pg/PgTimeoutReconciliationTest.kt`
-- [ ] T037 [P] [US3] 거래조회 중 승인 알림 동시 도착 → 승인 기록 1건 (US3-6) in `src/test/kotlin/io/github/yjy8501/paymentlab/pg/ReconcileWithCallbackRaceTest.kt`
+- [X] T035 [P] [US3] PG 정상 응답 테스트: 바로 승인 → `APPROVED`(`PG_RESPONSE`), 바로 실패 → `FAILED`(`PG_RESPONSE`) (US3-1·2) in `src/test/kotlin/io/github/yjy8501/paymentlab/pg/PgApprovalTest.kt`
+- [X] T036 [P] [US3] 타임아웃·거래조회 테스트: 조회 결과 승인 → `APPROVED`(`INQUIRY`), 실패 → `FAILED`, 3회 모두 결과 없음 → `NEEDS_REVIEW`(`UNRESOLVED`), 승인 요청 후 약 5초 안에 확정 (US3-3~5, SC-005) in `src/test/kotlin/io/github/yjy8501/paymentlab/pg/PgTimeoutReconciliationTest.kt`
+- [X] T037 [P] [US3] 거래조회 중 승인 알림 동시 도착 → 승인 기록 1건 (US3-6) in `src/test/kotlin/io/github/yjy8501/paymentlab/pg/ReconcileWithCallbackRaceTest.kt`
 
 ### Implementation for User Story 3
 
-- [ ] T038 [P] [US3] `PgClient` 인터페이스와 결과 타입(`PgApproveResult`, `InquiryResult`: `APPROVED(pgTxId)`·`FAILED`·`NOT_FOUND`) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PgClient.kt`
-- [ ] T039 [P] [US3] `FakePg` (시나리오 설정: 바로 승인·바로 실패·지연·유실, 「응답은 유실됐지만 실제 승인됨」 기억, 거래조회 결과) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/FakePg.kt`
-- [ ] T040 [US3] 상태 확정 로직을 ④의 조건부 전이로 통일: T019에서 만든 `PaymentSettler`(승인·실패·확인 필요 반영)를 PG 승인 흐름에서 그대로 사용 in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentSettler.kt`
-- [ ] T041 [US3] `PaymentApprovalService` (3초 타임아웃 → `Reconciler`로 즉시 1회 + 1초 간격 2회 조회) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PaymentApprovalService.kt`
-- [ ] T042 [US3] 승인 요청 API `POST /payments/{paymentNo}/approve` in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PaymentApprovalController.kt`
+- [X] T038 [P] [US3] `PgClient` 인터페이스와 결과 타입(`PgApproveResult`, `InquiryResult`: `APPROVED(pgTxId)`·`FAILED`·`NOT_FOUND`) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PgClient.kt`
+- [X] T039 [P] [US3] `FakePg` (시나리오 설정: 바로 승인·바로 실패·지연·유실, 「응답은 유실됐지만 실제 승인됨」 기억, 거래조회 결과) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/FakePg.kt`
+- [X] T040 [US3] 상태 확정 로직을 ④의 조건부 전이로 통일: T019에서 만든 `PaymentSettler`(승인·실패·확인 필요 반영)를 PG 승인 흐름에서 그대로 사용 in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentSettler.kt`
+- [X] T041 [US3] `PaymentApprovalService` (3초 타임아웃 → `Reconciler`로 즉시 1회 + 1초 간격 2회 조회) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PaymentApprovalService.kt`
+- [X] T042 [US3] 승인 요청 API `POST /payments/{paymentNo}/approve` in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PaymentApprovalController.kt`
 
 **Checkpoint**: 세 스토리의 테스트가 모두 통과한다
 

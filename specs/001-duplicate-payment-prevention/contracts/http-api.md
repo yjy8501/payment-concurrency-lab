@@ -46,3 +46,9 @@
 `status`: `APPROVED` · `FAILED` · `NEEDS_REVIEW`
 
 `resolvedBy`: `PG_RESPONSE`(바로 응답받음) · `INQUIRY`(거래조회로 확정) · `UNRESOLVED`(확인 필요)
+
+| 상황 | HTTP |
+|---|---|
+| 결과 확정 (승인·실패·확인 필요) | 200 |
+| 결제 없음 | 404 |
+| 결제가 대기 상태가 아님 (이미 요청했거나 확정됨) | 409 |
