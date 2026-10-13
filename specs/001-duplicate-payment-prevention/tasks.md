@@ -131,11 +131,11 @@ description: "Task list for 이중 결제 방지 실험"
 
 ## Phase 6: Polish (문서와 마무리)
 
-- [ ] T043 [P] ADR 작성: 왜 분산 락이 아니라 조건부 전이 + 유일 제약인가 (대안: 조회 후 저장·낙관적 락·Redis 잠금·행 잠금, 채택 근거, 기각 사유, 비교표의 정확성·처리 시간 인용) in `docs/adr/0001-conditional-update-over-distributed-lock.md`
-- [ ] T044 [P] ADR 작성: 승인 기록 테이블을 둘로 나눈 이유 in `docs/adr/0002-separate-unguarded-approval-table.md`
-- [ ] T045 README 작성: 한 줄 소개, 결과 표(`comparison.md`에서 옮김, 측정 환경 포함), 실행 방법, SDD 진행 과정(spec → plan → tasks → 구현 → 대조) 링크 in `README.md`
-- [ ] T046 quickstart.md 절차대로 전체 실행해 결과 확인 (`./gradlew test`, `./gradlew comparison`)
-- [ ] T047 회사 식별자·내부 정보가 없는지 전체 검색으로 확인 (원칙 V)
+- [X] T043 [P] ADR 작성: 왜 분산 락이 아니라 조건부 전이 + 유일 제약인가 (대안: 조회 후 저장·낙관적 락·Redis 잠금·행 잠금, 채택 근거, 기각 사유, 비교표의 정확성·처리 시간 인용) in `docs/adr/0001-conditional-update-over-distributed-lock.md`
+- [X] T044 [P] ADR 작성: 승인 기록 테이블을 둘로 나눈 이유 in `docs/adr/0002-separate-unguarded-approval-table.md`
+- [X] T045 README 작성: 한 줄 소개, 결과 표(`comparison.md`에서 옮김, 측정 환경 포함), 실행 방법, SDD 진행 과정(spec → plan → tasks → 구현 → 대조) 링크 in `README.md`
+- [X] T046 quickstart.md 절차대로 전체 실행해 결과 확인 (`./gradlew test`, `./gradlew comparison`)
+- [X] T047 회사 식별자·내부 정보가 없는지 전체 검색으로 확인 (원칙 V)
 
 ---
 
