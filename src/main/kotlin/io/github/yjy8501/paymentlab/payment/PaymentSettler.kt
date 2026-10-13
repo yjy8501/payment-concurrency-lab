@@ -39,7 +39,14 @@ class PaymentSettler(
         return true
     }
 
+    /**
+     * PG에 승인 요청을 보낼 권리를 선점한다 (`PENDING → REQUESTING`, FR-013).
+     * PG 호출은 DB 트랜잭션으로 되돌릴 수 없으므로, 호출 전에 같은 조건부 전이로 한 요청만 통과시킨다.
+     */
+    fun claimForRequest(payment: Payment): Boolean =
+        payments.transition(payment.id!!, listOf(PaymentStatus.PENDING), PaymentStatus.REQUESTING) == 1
+
     /** 거래조회로도 확정하지 못한 결제를 「확인 필요」로 바꾼다 (FR-011) */
     fun markNeedsReview(payment: Payment): Boolean =
-        payments.transition(payment.id!!, listOf(PaymentStatus.PENDING), PaymentStatus.NEEDS_REVIEW) == 1
+        payments.transition(payment.id!!, listOf(PaymentStatus.REQUESTING), PaymentStatus.NEEDS_REVIEW) == 1
 }

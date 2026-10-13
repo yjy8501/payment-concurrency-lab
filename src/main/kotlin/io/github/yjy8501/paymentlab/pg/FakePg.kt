@@ -43,6 +43,8 @@ class FakePg : PgClient {
 
     private val inquiryCounts = ConcurrentHashMap<String, AtomicInteger>()
 
+    private val approveCounts = ConcurrentHashMap<String, AtomicInteger>()
+
     /**
      * [paymentNo]의 응답 방식을 정한다.
      * [inquiries]는 거래조회 때 앞에서부터 하나씩 돌려줄 결과다. 다 쓰면 PG 내부 상태대로 답한다.
@@ -58,14 +60,19 @@ class FakePg : PgClient {
 
     fun inquiryCount(paymentNo: String): Int = inquiryCounts[paymentNo]?.get() ?: 0
 
+    /** PG가 받은 승인 요청 횟수 */
+    fun approveCount(paymentNo: String): Int = approveCounts[paymentNo]?.get() ?: 0
+
     fun reset() {
         scripts.clear()
         approvedTransactions.clear()
         inquiryCounts.clear()
+        approveCounts.clear()
     }
 
-    override fun approve(paymentNo: String, amount: Long): PgApproveResult =
-        when (scripts[paymentNo]?.reply ?: Reply.APPROVE) {
+    override fun approve(paymentNo: String, amount: Long): PgApproveResult {
+        approveCounts.computeIfAbsent(paymentNo) { AtomicInteger() }.incrementAndGet()
+        return when (scripts[paymentNo]?.reply ?: Reply.APPROVE) {
             Reply.APPROVE -> PgApproveResult.Approved(recordApproval(paymentNo))
             Reply.FAIL -> PgApproveResult.Failed
             Reply.NO_REPLY_BUT_APPROVED -> {
@@ -74,6 +81,7 @@ class FakePg : PgClient {
             }
             Reply.NO_REPLY_NOT_APPROVED -> neverReply()
         }
+    }
 
     override fun inquire(paymentNo: String): InquiryResult {
         inquiryCounts.computeIfAbsent(paymentNo) { AtomicInteger() }.incrementAndGet()

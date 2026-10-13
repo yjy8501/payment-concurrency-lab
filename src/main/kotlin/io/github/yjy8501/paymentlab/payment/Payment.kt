@@ -12,18 +12,22 @@ import java.time.Instant
 
 enum class PaymentStatus {
     PENDING,
+
+    /** PG에 승인 요청을 보낼 권리를 선점한 상태 (FR-013) */
+    REQUESTING,
     APPROVED,
     FAILED,
     NEEDS_REVIEW;
 
     /** 아직 승인·실패로 확정되지 않은 상태 */
     val isOpen: Boolean
-        get() = this == PENDING || this == NEEDS_REVIEW
+        get() = this == PENDING || this == REQUESTING || this == NEEDS_REVIEW
 
     /** FR-002에서 허용한 전이만 true */
     fun canMoveTo(target: PaymentStatus): Boolean = when (target) {
         APPROVED, FAILED -> isOpen
-        NEEDS_REVIEW -> this == PENDING
+        REQUESTING -> this == PENDING
+        NEEDS_REVIEW -> this == REQUESTING
         PENDING -> false
     }
 

@@ -53,7 +53,9 @@ class PaymentApprovalService(
 
     fun approve(paymentNo: String): ApprovalOutcome {
         val payment = payments.findByPaymentNo(paymentNo) ?: throw PaymentNotFoundException(paymentNo)
-        if (payment.status != PaymentStatus.PENDING) throw PaymentNotPendingException(paymentNo, payment.status)
+        // 상태를 읽고 판단하면 동시 요청이 모두 통과한다. 선점에 성공한 요청만 PG를 호출한다 (FR-013)
+        val claimed = tx.execute { settler.claimForRequest(payment) }!!
+        if (!claimed) throw PaymentNotPendingException(paymentNo, payments.findByPaymentNo(paymentNo)!!.status)
 
         val resolvedBy = when (val reply = requestApproval(payment)) {
             is PgApproveResult.Approved -> settle(payment, PaymentStatus.APPROVED, reply.pgTxId).let { ResolvedBy.PG_RESPONSE }

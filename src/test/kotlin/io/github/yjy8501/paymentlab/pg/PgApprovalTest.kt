@@ -43,6 +43,19 @@ class PgApprovalTest : IntegrationTest() {
     }
 
     @Test
+    fun `같은 결제에 승인 요청이 동시에 10번 와도 PG에는 1번만 요청한다`() {
+        val paymentNo = createPayment()
+
+        val stats = caller.postConcurrently(10, "/payments/$paymentNo/approve", "{}")
+
+        assertEquals(1, fakePg.approveCount(paymentNo), "PG 승인 요청 횟수 (SC-007)")
+        assertEquals(1, stats.calls.count { it.status == 200 })
+        assertEquals(9, stats.calls.count { it.status == 409 }, "나머지는 이미 요청됨으로 거절")
+        assertEquals(PaymentStatus.APPROVED, statusOf(paymentNo))
+        assertEquals(1, approvalCount(paymentNo))
+    }
+
+    @Test
     fun `대기 상태가 아닌 결제는 다시 승인 요청할 수 없다`() {
         val paymentNo = createPayment()
         caller.post("/payments/$paymentNo/approve", "{}")
