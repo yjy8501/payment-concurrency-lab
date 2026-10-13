@@ -139,6 +139,29 @@ description: "Task list for 이중 결제 방지 실험"
 
 ---
 
+## Phase 7: 추가 요구사항 - 승인 요청 중복 방지 (FR-013)
+
+**배경**: 문서 검토 중 발견. 승인 요청 API가 「대기 상태 확인 → PG 호출」 순서라, 같은 결제에 승인 요청이 동시에 오면
+PG에 여러 번 요청이 나갈 수 있었다. PG 호출은 DB 트랜잭션으로 되돌릴 수 없으므로 호출 전에 선점해야 한다.
+
+**Independent Test**: 같은 결제에 승인 요청 10개를 동시에 보내면 PG 승인 요청은 1번, 승인 기록은 1건
+
+### Tests
+
+- [ ] T048 [P] [US3] `FakePg`에 결제별 승인 요청 횟수 기록 (`approveCount`) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/FakePg.kt`
+- [ ] T049 [US3] 동시 승인 요청 테스트: 10개 동시 → PG 승인 요청 1번, 200 1개·409 9개, 승인 기록 1건 (US3-7, SC-007) in `src/test/kotlin/io/github/yjy8501/paymentlab/pg/PgApprovalTest.kt`
+
+### Implementation
+
+- [ ] T050 [US3] Flyway 마이그레이션: `payment.status` 체크 제약에 `REQUESTING` 추가 in `src/main/resources/db/migration/V2__add_requesting_status.sql`
+- [ ] T051 [US3] `PaymentStatus`에 `REQUESTING` 추가, 전이 규칙을 FR-002에 맞게 갱신 in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/Payment.kt`
+- [ ] T052 [US3] `PaymentSettler`에 선점(`PENDING → REQUESTING`) 추가, 「확인 필요」 전이의 출발 상태를 `REQUESTING`으로 변경 in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentSettler.kt`
+- [ ] T053 [US3] `PaymentApprovalService`: 상태 조회 대신 선점에 성공한 요청만 PG 호출, 실패하면 409 in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PaymentApprovalService.kt`
+
+**Checkpoint**: 전체 테스트 통과, 이후 T046(전체 재실행) 다시 수행
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
