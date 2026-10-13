@@ -208,3 +208,20 @@ T029 ExpiringLock
 5. Polish → ADR, README
 
 각 단계를 별도 커밋으로 남긴다(원칙: 개발 흐름).
+
+---
+
+## Phase 8: Convergence
+
+독립 검토자가 spec·plan·tasks와 코드를 대조해 찾은 남은 작업 (CRITICAL 0, HIGH 0, MEDIUM 2, LOW 8)
+
+- [ ] T054 `FakePg`에 「지정한 시간 뒤 응답」 모드를 추가하고, 3초 안 응답은 `PG_RESPONSE`, 3초를 넘긴 응답은 `INQUIRY`로 확정되는지 테스트 per FR-012 (partial)
+- [ ] T055 방식 ③을 기본 TTL로 100개 동시 × 10회 실행해 매회 승인 1건·`CONFLICT` 1개 이상인지 확인하는 단언 추가, 방식 ②도 비교표 테스트에서 함께 단언 per US2 표 ③·US2/AC3 (partial)
+- [ ] T056 PG 승인 호출이 예외로 끝나면(`ExecutionException`) 「결과 모름」으로 보고 거래조회를 진행해, 결제가 `REQUESTING`에 남지 않게 하기. 가짜 PG에 예외 응답 모드와 테스트 추가 per SC-005 (partial)
+- [ ] T057 spec의 FR-004·FR-005·Edge Cases가 「채택 방식(④)과 PG 승인 흐름」에 적용된다고 범위를 명확히 하기. ①②③은 비교를 위해 일부러 위반하는 방식임을 명시 per FR-004·FR-005 (contradicts, spec ambiguity)
+- [ ] T058 승인 요청 409 응답에 `ALREADY_REQUESTED` 결과 코드를 넣고 테스트에서 확인 per US3/AC7 (partial)
+- [ ] T059 알 수 없는 `{strategy}`는 404 대신 400으로 응답해 「결제 없음(404)」과 구분 per contracts/http-api.md (contradicts)
+- [ ] T060 없는 결제에 승인 요청하면 404인지 확인하는 테스트 추가 per contracts/http-api.md approve 404 (partial)
+- [ ] T061 결제 생성 API의 400(금액 0 이하)을 contracts/http-api.md에 추가하고, `TestPaymentLabApplication`(`bootTestRun`)을 quickstart에 실행 방법으로 명시 per contracts POST /payments (unrequested)
+- [ ] T062 plan·T041의 `Reconciler` 표기를 실제 구조(`PaymentApprovalService` 내부 메서드)에 맞게 고치기 per plan: structure (partial)
+- [ ] T063 T011의 「컨테이너 재사용」 표기를 「Spring 테스트 컨텍스트 캐시로 한 번의 실행 안에서 공유」로 고치기 per T011 (partial)
