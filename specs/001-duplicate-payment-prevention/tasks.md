@@ -27,11 +27,11 @@ description: "Task list for 이중 결제 방지 실험"
 
 ## Phase 1: Setup (프로젝트 뼈대)
 
-- [ ] T001 Gradle Kotlin DSL 프로젝트와 Wrapper 생성: `settings.gradle.kts`, `build.gradle.kts`, `gradlew`, `gradle/wrapper/` (Kotlin 2.4.21, Spring Boot 4.1.1, JDK 21 toolchain)
-- [ ] T002 의존성 추가 in `build.gradle.kts`: Web MVC, Data JPA, Data Redis, Flyway(PostgreSQL), PostgreSQL 드라이버, Jackson Kotlin, 테스트용 Spring Boot Test·Testcontainers 2.0.5(PostgreSQL)·JUnit 5
-- [ ] T003 [P] `.gitignore` 작성 (build/, .gradle/, .idea/, `.claude/settings.local.json`)
-- [ ] T004 [P] 애플리케이션 진입점 생성 in `src/main/kotlin/io/github/yjy8501/paymentlab/PaymentLabApplication.kt`
-- [ ] T005 [P] 설정 파일 작성 in `src/main/resources/application.yml` (Hikari 풀 50, PG 대기 3초, 거래조회 간격 1초·총 3회, ③ 잠금 TTL 5초)
+- [X] T001 Gradle Kotlin DSL 프로젝트와 Wrapper 생성: `settings.gradle.kts`, `build.gradle.kts`, `gradlew`, `gradle/wrapper/` (Kotlin 2.3.21, Spring Boot 4.1.1, JDK 21 toolchain)
+- [X] T002 의존성 추가 in `build.gradle.kts`: Web MVC, Data JPA, Data Redis, Flyway(PostgreSQL), PostgreSQL 드라이버, Jackson Kotlin, 테스트용 Spring Boot Test·Testcontainers 2.0.5(PostgreSQL)·JUnit 5
+- [X] T003 [P] `.gitignore` 작성 (build/, .gradle/, .idea/, `.claude/settings.local.json`)
+- [X] T004 [P] 애플리케이션 진입점 생성 in `src/main/kotlin/io/github/yjy8501/paymentlab/PaymentLabApplication.kt`
+- [X] T005 [P] 설정 파일 작성 in `src/main/resources/application.yml` (Hikari 풀 50, PG 대기 3초, 거래조회 간격 1초·총 3회, ③ 잠금 TTL 5초)
 
 ---
 
@@ -39,14 +39,14 @@ description: "Task list for 이중 결제 방지 실험"
 
 **이 단계가 끝나야 사용자 스토리 작업을 시작할 수 있다**
 
-- [ ] T006 Flyway 마이그레이션 작성 in `src/main/resources/db/migration/V1__init.sql`: `payment`(payment_no varchar(40) UNIQUE, amount bigint > 0, status varchar(20) `PENDING`·`APPROVED`·`FAILED`·`NEEDS_REVIEW`, version bigint), `approval`(payment_id **UNIQUE** FK, pg_tx_id varchar(40), amount, approved_at), `approval_unguarded`(같은 열, 유일 제약 없음)
-- [ ] T007 [P] `PaymentStatus` enum과 `Payment` 엔티티 in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/Payment.kt`
-- [ ] T008 [P] `Approval`, `UnguardedApproval` 엔티티와 저장소 in `src/main/kotlin/io/github/yjy8501/paymentlab/approval/`
-- [ ] T009 `PaymentRepository` (결제 번호로 조회, 조건부 전이 `UPDATE ... WHERE id = ? AND status IN ('PENDING','NEEDS_REVIEW')`) in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentRepository.kt`
-- [ ] T010 결제 생성 API `POST /payments` in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentController.kt`
-- [ ] T011 [P] Testcontainers 공통 설정(PostgreSQL 17·Redis 7, `@ServiceConnection`, 컨테이너 재사용) in `src/test/kotlin/io/github/yjy8501/paymentlab/support/TestContainersConfig.kt`
-- [ ] T012 [P] 동시 요청 실행기 `ConcurrentCaller` (N개 요청을 `CountDownLatch`로 동시 출발, 응답 종류별 개수·전체 처리 시간·평균 응답 시간 집계) in `src/test/kotlin/io/github/yjy8501/paymentlab/support/ConcurrentCaller.kt`
-- [ ] T013 기반 동작 확인 테스트 (컨테이너 기동, 마이그레이션, 결제 생성) in `src/test/kotlin/io/github/yjy8501/paymentlab/payment/PaymentCreationTest.kt`
+- [X] T006 Flyway 마이그레이션 작성 in `src/main/resources/db/migration/V1__init.sql`: `payment`(payment_no varchar(40) UNIQUE, amount bigint > 0, status varchar(20) `PENDING`·`APPROVED`·`FAILED`·`NEEDS_REVIEW`, version bigint), `approval`(payment_id **UNIQUE** FK, pg_tx_id varchar(40), amount, approved_at), `approval_unguarded`(같은 열, 유일 제약 없음)
+- [X] T007 [P] `PaymentStatus` enum과 `Payment` 엔티티 in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/Payment.kt`
+- [X] T008 [P] `Approval`, `UnguardedApproval` 엔티티와 저장소 in `src/main/kotlin/io/github/yjy8501/paymentlab/approval/`
+- [X] T009 `PaymentRepository` (결제 번호로 조회, 조건부 전이 `UPDATE ... WHERE id = ? AND status IN ('PENDING','NEEDS_REVIEW')`) in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentRepository.kt`
+- [X] T010 결제 생성 API `POST /payments` in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentController.kt`
+- [X] T011 [P] Testcontainers 공통 설정(PostgreSQL 17·Redis 7, `@ServiceConnection`, 컨테이너 재사용) in `src/test/kotlin/io/github/yjy8501/paymentlab/support/TestContainersConfig.kt`
+- [X] T012 [P] 동시 요청 실행기 `ConcurrentCaller` (N개 요청을 `CountDownLatch`로 동시 출발, 응답 종류별 개수·전체 처리 시간·평균 응답 시간 집계) in `src/test/kotlin/io/github/yjy8501/paymentlab/support/ConcurrentCaller.kt`
+- [X] T013 기반 동작 확인 테스트 (컨테이너 기동, 마이그레이션, 결제 생성) in `src/test/kotlin/io/github/yjy8501/paymentlab/payment/PaymentCreationTest.kt`
 
 **Checkpoint**: `./gradlew test`로 컨테이너가 뜨고 결제를 만들 수 있다
 

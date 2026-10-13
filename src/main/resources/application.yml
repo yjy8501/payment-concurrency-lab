@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: payment-lab
+  datasource:
+    hikari:
+      # 동시 요청 100개 중 최대한 많은 요청이 동시에 DB에 닿게 한다 (research R6)
+      maximum-pool-size: 50
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+
+lab:
+  pg:
+    # PG 승인 응답을 기다리는 시간 (FR-009)
+    response-timeout: 3s
+    # 거래조회 간격과 총 횟수: 대기 직후 1번, 이후 1초 간격으로 2번 더 (FR-010)
+    inquiry-interval: 1s
+    inquiry-attempts: 3
+  redis-lock:
+    # 방식 ③ 잠금 유지 시간 (research R3)
+    ttl: 5s

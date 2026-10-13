@@ -13,7 +13,7 @@
 
 ## Technical Context
 
-**Language/Version**: Kotlin 2.4.21, JDK 21
+**Language/Version**: Kotlin 2.3.21, JDK 21
 
 **Primary Dependencies**: Spring Boot 4.1.1 (Web MVC, Data JPA, Data Redis), Flyway
 

@@ -4,9 +4,10 @@ spec의 요구사항을 구현하기 위해 내린 기술 결정을 정리한다
 
 ## R1. 기술 스택 버전
 
-- **Decision**: Kotlin 2.4.21, Spring Boot 4.1.1, JDK 21, Gradle Kotlin DSL(Wrapper 포함),
+- **Decision**: Kotlin 2.3.21, Spring Boot 4.1.1, JDK 21, Gradle Kotlin DSL(Wrapper 포함),
   PostgreSQL 17, Redis 7, Testcontainers 2.0.5, JUnit 5.
-- **Rationale**: 2026-10 기준 각 프로젝트의 최신 안정 버전이다. Gradle Wrapper를 넣어 JDK와 Docker만
+- **Rationale**: 2026-10 기준 최신 안정 버전이다. Kotlin은 최신(2.4.x) 대신 Spring Initializr가 Spring Boot 4.1.1과 함께
+  쓰도록 지정한 2.3.21을 쓴다(공식 지원 조합). Gradle Wrapper를 넣어 JDK와 Docker만
   있으면 실행되게 한다(원칙: 기술 제약).
 - **Alternatives considered**: Spring Boot 3.5 — 오픈소스 지원 기간이 끝나 새 데모에 쓸 이유가 없다.
 
