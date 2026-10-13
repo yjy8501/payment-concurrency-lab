@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
+data class ApprovalError(val result: String, val message: String?)
+
 /** PG 승인 요청 API (contracts/http-api.md) */
 @RestController
 class PaymentApprovalController(private val approvalService: PaymentApprovalService) {
@@ -16,9 +18,9 @@ class PaymentApprovalController(private val approvalService: PaymentApprovalServ
 
     @ExceptionHandler(PaymentNotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun notFound(e: PaymentNotFoundException): Map<String, String?> = mapOf("message" to e.message)
+    fun notFound(e: PaymentNotFoundException): ApprovalError = ApprovalError("PAYMENT_NOT_FOUND", e.message)
 
     @ExceptionHandler(PaymentNotPendingException::class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    fun notPending(e: PaymentNotPendingException): Map<String, String?> = mapOf("message" to e.message)
+    fun notPending(e: PaymentNotPendingException): ApprovalError = ApprovalError("ALREADY_REQUESTED", e.message)
 }

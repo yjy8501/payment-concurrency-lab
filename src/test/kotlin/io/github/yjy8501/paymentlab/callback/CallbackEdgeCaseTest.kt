@@ -33,6 +33,16 @@ class CallbackEdgeCaseTest : IntegrationTest() {
     }
 
     @Test
+    fun `알 수 없는 처리 방식이면 결제 없음과 구분해 400으로 응답한다`() {
+        val paymentNo = createPayment()
+
+        val response = caller.post("/callbacks/no-such-strategy", callbackJson(paymentNo))
+
+        assertEquals(400, response.status)
+        assertEquals(PaymentStatus.PENDING, statusOf(paymentNo))
+    }
+
+    @Test
     fun `금액이 다르면 승인하지 않는다`() {
         val paymentNo = createPayment(amount = 10_000)
 

@@ -33,7 +33,16 @@ cat build/reports/comparison.md
 처리 시간(전체·평균)은 실행한 컴퓨터에 따라 달라지는 참고값이다.
 ③의 TTL 만료 중복은 별도 테스트(`RedisLockExpiryTest`)에서 확인한다.
 
-## 3. 시나리오별 확인
+## 3. 애플리케이션 직접 띄우기 (선택)
+
+```bash
+./gradlew bootTestRun
+```
+
+`TestPaymentLabApplication`이 PostgreSQL·Redis 컨테이너와 함께 애플리케이션을 띄운다.
+[contracts/http-api.md](./contracts/http-api.md)의 API를 직접 호출해 볼 수 있다.
+
+## 4. 시나리오별 확인
 
 | 확인할 것 | 테스트 | spec |
 |---|---|---|
@@ -41,9 +50,10 @@ cat build/reports/comparison.md
 | ①에서 중복 발생 | `ReadThenSaveConcurrencyTest` | US2-2, SC-004 |
 | ② 승인 1건 + 오류 발생 | `OptimisticLockConcurrencyTest` | US2-3 |
 | ③ TTL 만료 시 중복 | `RedisLockExpiryTest` | US2-4, SC-004 |
+| ③ 기본 TTL에서 승인 1건 + 잠금 실패 오류 | `RedisLockConcurrencyTest` | US2 표 ③ |
 | ⑤ 승인 1건, 오류 0개 | `PessimisticLockConcurrencyTest` | US2-5, SC-006 |
-| PG가 바로 승인·실패 응답 | `PgApprovalTest` | US3-1·2 |
-| 응답 유실 → 거래조회로 확정 | `PgTimeoutReconciliationTest` | US3-3~5, SC-005 |
+| PG가 바로 승인·실패 응답, 동시 승인 요청은 PG 1번만 | `PgApprovalTest` | US3-1·2·7, SC-007 |
+| 응답 지연·유실·호출 오류 → 거래조회로 확정 | `PgTimeoutReconciliationTest` | US3-3~5, SC-005, FR-012 |
 | 거래조회 중 승인 알림 동시 도착 | `ReconcileWithCallbackRaceTest` | US3-6 |
 | 처리 중간 오류 → 반쪽 반영 없음 | `AtomicityTest` | FR-006 |
 | 예외 상황(금액 불일치, 없는 결제, 승인·실패 동시 도착) | `CallbackEdgeCaseTest` | Edge Cases |

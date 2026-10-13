@@ -15,6 +15,9 @@ sealed interface InquiryResult {
     data object NotFound : InquiryResult
 }
 
+/** PG 호출이 응답 없이 오류로 끝났다. 승인됐는지 알 수 없다 */
+class PgCallException(message: String) : RuntimeException(message)
+
 /** 결제대행사(PG)와의 통신. 이 저장소에서는 [FakePg]만 구현한다 (원칙 V) */
 interface PgClient {
 

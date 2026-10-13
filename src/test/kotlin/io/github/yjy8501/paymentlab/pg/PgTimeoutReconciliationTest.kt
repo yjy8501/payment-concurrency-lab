@@ -83,6 +83,46 @@ class PgTimeoutReconciliationTest : IntegrationTest() {
         assertTrue(elapsed < Duration.ofSeconds(6), "SC-005: 약 5초 안에 확정: $elapsed")
     }
 
+    @Test
+    fun `PG 응답이 3초 안에 늦게 오면 그 응답으로 확정한다`() {
+        val paymentNo = createPayment()
+        fakePg.script(paymentNo, FakePg.Reply.APPROVE, replyDelay = Duration.ofSeconds(2))
+
+        val (response, elapsed) = timed { caller.post("/payments/$paymentNo/approve", "{}") }
+
+        assertEquals("APPROVED", response.field("status"))
+        assertEquals("PG_RESPONSE", response.field("resolvedBy"))
+        assertEquals(0, fakePg.inquiryCount(paymentNo), "거래조회는 하지 않는다")
+        assertTrue(elapsed >= Duration.ofSeconds(2), "응답을 기다렸다: $elapsed")
+    }
+
+    @Test
+    fun `PG 응답이 3초를 넘겨 오면 기다리지 않고 거래조회로 확정한다`() {
+        val paymentNo = createPayment()
+        fakePg.script(paymentNo, FakePg.Reply.APPROVE, replyDelay = Duration.ofSeconds(4))
+
+        val (response, elapsed) = timed { caller.post("/payments/$paymentNo/approve", "{}") }
+
+        assertEquals("APPROVED", response.field("status"))
+        assertEquals("INQUIRY", response.field("resolvedBy"))
+        assertEquals(1, approvalCount(paymentNo))
+        assertTrue(elapsed < Duration.ofSeconds(4), "늦은 응답을 끝까지 기다리지 않는다: $elapsed")
+    }
+
+    @Test
+    fun `PG 호출이 오류로 끝나면 결과 모름으로 보고 거래조회해서 승인 요청 중에 남기지 않는다`() {
+        val paymentNo = createPayment()
+        fakePg.script(paymentNo, FakePg.Reply.ERROR)
+
+        val response = caller.post("/payments/$paymentNo/approve", "{}")
+
+        assertEquals(200, response.status, response.body)
+        assertEquals("NEEDS_REVIEW", response.field("status"))
+        assertEquals("UNRESOLVED", response.field("resolvedBy"))
+        assertEquals(PaymentStatus.NEEDS_REVIEW, statusOf(paymentNo), "REQUESTING에 남지 않는다")
+        assertEquals(3, fakePg.inquiryCount(paymentNo))
+    }
+
     private fun timed(block: () -> CallResult): Pair<CallResult, Duration> {
         val started = System.nanoTime()
         val result = block()

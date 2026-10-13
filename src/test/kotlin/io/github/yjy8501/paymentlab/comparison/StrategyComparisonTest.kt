@@ -41,10 +41,13 @@ class StrategyComparisonTest : IntegrationTest() {
         File("build/reports/comparison.md").writeText(report)
         println(report)
 
-        // 정답 방식(④, ⑤)은 비교표를 만들면서도 매번 승인 1건이어야 한다
+        // 비교표의 숫자가 spec의 예상 결과(US2 표)와 맞는지 함께 확인한다
+        fun runsOf(key: String) = results.getValue(strategies.first { it.key == key })
         listOf("conditional-update", "pessimistic-lock").forEach { key ->
-            val runs = results.getValue(strategies.first { it.key == key })
-            assertTrue(runs.all { it.approvals == 1 }, "$key 승인 기록: ${runs.map { it.approvals }}")
+            assertTrue(runsOf(key).all { it.approvals == 1 && it.stats.errorCount == 0 }, "$key: ${runsOf(key).map { it.approvals }}")
+        }
+        listOf("optimistic-lock", "redis-lock").forEach { key ->
+            assertTrue(runsOf(key).all { it.approvals == 1 && it.stats.count("CONFLICT") >= 1 }, "$key: ${runsOf(key).map { it.approvals }}")
         }
     }
 

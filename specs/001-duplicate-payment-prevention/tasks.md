@@ -44,7 +44,7 @@ description: "Task list for 이중 결제 방지 실험"
 - [X] T008 [P] `Approval`, `UnguardedApproval` 엔티티와 저장소 in `src/main/kotlin/io/github/yjy8501/paymentlab/approval/`
 - [X] T009 `PaymentRepository` (결제 번호로 조회, 조건부 전이 `UPDATE ... WHERE id = ? AND status IN ('PENDING','NEEDS_REVIEW')`) in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentRepository.kt`
 - [X] T010 결제 생성 API `POST /payments` in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentController.kt`
-- [X] T011 [P] Testcontainers 공통 설정(PostgreSQL 17·Redis 7, `@ServiceConnection`, 컨테이너 재사용) in `src/test/kotlin/io/github/yjy8501/paymentlab/support/TestContainersConfig.kt`
+- [X] T011 [P] Testcontainers 공통 설정(PostgreSQL 17·Redis 7, `@ServiceConnection`, Spring 테스트 컨텍스트 캐시로 한 번의 실행 안에서 컨테이너 공유) in `src/test/kotlin/io/github/yjy8501/paymentlab/support/TestContainersConfig.kt`
 - [X] T012 [P] 동시 요청 실행기 `ConcurrentCaller` (N개 요청을 `CountDownLatch`로 동시 출발, 응답 종류별 개수·전체 처리 시간·평균 응답 시간 집계) in `src/test/kotlin/io/github/yjy8501/paymentlab/support/ConcurrentCaller.kt`
 - [X] T013 기반 동작 확인 테스트 (컨테이너 기동, 마이그레이션, 결제 생성) in `src/test/kotlin/io/github/yjy8501/paymentlab/payment/PaymentCreationTest.kt`
 
@@ -122,7 +122,7 @@ description: "Task list for 이중 결제 방지 실험"
 - [X] T038 [P] [US3] `PgClient` 인터페이스와 결과 타입(`PgApproveResult`, `InquiryResult`: `APPROVED(pgTxId)`·`FAILED`·`NOT_FOUND`) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PgClient.kt`
 - [X] T039 [P] [US3] `FakePg` (시나리오 설정: 바로 승인·바로 실패·지연·유실, 「응답은 유실됐지만 실제 승인됨」 기억, 거래조회 결과) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/FakePg.kt`
 - [X] T040 [US3] 상태 확정 로직을 ④의 조건부 전이로 통일: T019에서 만든 `PaymentSettler`(승인·실패·확인 필요 반영)를 PG 승인 흐름에서 그대로 사용 in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentSettler.kt`
-- [X] T041 [US3] `PaymentApprovalService` (3초 타임아웃 → `Reconciler`로 즉시 1회 + 1초 간격 2회 조회) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PaymentApprovalService.kt`
+- [X] T041 [US3] `PaymentApprovalService` (3초 타임아웃 → 서비스 내부 `reconcile`로 즉시 1회 + 1초 간격 2회 조회) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PaymentApprovalService.kt`
 - [X] T042 [US3] 승인 요청 API `POST /payments/{paymentNo}/approve` in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PaymentApprovalController.kt`
 
 **Checkpoint**: 세 스토리의 테스트가 모두 통과한다
@@ -215,13 +215,13 @@ T029 ExpiringLock
 
 독립 검토자가 spec·plan·tasks와 코드를 대조해 찾은 남은 작업 (CRITICAL 0, HIGH 0, MEDIUM 2, LOW 8)
 
-- [ ] T054 `FakePg`에 「지정한 시간 뒤 응답」 모드를 추가하고, 3초 안 응답은 `PG_RESPONSE`, 3초를 넘긴 응답은 `INQUIRY`로 확정되는지 테스트 per FR-012 (partial)
-- [ ] T055 방식 ③을 기본 TTL로 100개 동시 × 10회 실행해 매회 승인 1건·`CONFLICT` 1개 이상인지 확인하는 단언 추가, 방식 ②도 비교표 테스트에서 함께 단언 per US2 표 ③·US2/AC3 (partial)
-- [ ] T056 PG 승인 호출이 예외로 끝나면(`ExecutionException`) 「결과 모름」으로 보고 거래조회를 진행해, 결제가 `REQUESTING`에 남지 않게 하기. 가짜 PG에 예외 응답 모드와 테스트 추가 per SC-005 (partial)
-- [ ] T057 spec의 FR-004·FR-005·Edge Cases가 「채택 방식(④)과 PG 승인 흐름」에 적용된다고 범위를 명확히 하기. ①②③은 비교를 위해 일부러 위반하는 방식임을 명시 per FR-004·FR-005 (contradicts, spec ambiguity)
-- [ ] T058 승인 요청 409 응답에 `ALREADY_REQUESTED` 결과 코드를 넣고 테스트에서 확인 per US3/AC7 (partial)
-- [ ] T059 알 수 없는 `{strategy}`는 404 대신 400으로 응답해 「결제 없음(404)」과 구분 per contracts/http-api.md (contradicts)
-- [ ] T060 없는 결제에 승인 요청하면 404인지 확인하는 테스트 추가 per contracts/http-api.md approve 404 (partial)
-- [ ] T061 결제 생성 API의 400(금액 0 이하)을 contracts/http-api.md에 추가하고, `TestPaymentLabApplication`(`bootTestRun`)을 quickstart에 실행 방법으로 명시 per contracts POST /payments (unrequested)
-- [ ] T062 plan·T041의 `Reconciler` 표기를 실제 구조(`PaymentApprovalService` 내부 메서드)에 맞게 고치기 per plan: structure (partial)
-- [ ] T063 T011의 「컨테이너 재사용」 표기를 「Spring 테스트 컨텍스트 캐시로 한 번의 실행 안에서 공유」로 고치기 per T011 (partial)
+- [X] T054 `FakePg`에 「지정한 시간 뒤 응답」 모드를 추가하고, 3초 안 응답은 `PG_RESPONSE`, 3초를 넘긴 응답은 `INQUIRY`로 확정되는지 테스트 per FR-012 (partial)
+- [X] T055 방식 ③을 기본 TTL로 100개 동시 × 10회 실행해 매회 승인 1건·`CONFLICT` 1개 이상인지 확인하는 단언 추가, 방식 ②도 비교표 테스트에서 함께 단언 per US2 표 ③·US2/AC3 (partial)
+- [X] T056 PG 승인 호출이 예외로 끝나면(`ExecutionException`) 「결과 모름」으로 보고 거래조회를 진행해, 결제가 `REQUESTING`에 남지 않게 하기. 가짜 PG에 예외 응답 모드와 테스트 추가 per SC-005 (partial)
+- [X] T057 spec의 FR-004·FR-005·Edge Cases가 「채택 방식(④)과 PG 승인 흐름」에 적용된다고 범위를 명확히 하기. ①②③은 비교를 위해 일부러 위반하는 방식임을 명시 per FR-004·FR-005 (contradicts, spec ambiguity)
+- [X] T058 승인 요청 409 응답에 `ALREADY_REQUESTED` 결과 코드를 넣고 테스트에서 확인 per US3/AC7 (partial)
+- [X] T059 알 수 없는 `{strategy}`는 404 대신 400으로 응답해 「결제 없음(404)」과 구분 per contracts/http-api.md (contradicts)
+- [X] T060 없는 결제에 승인 요청하면 404인지 확인하는 테스트 추가 per contracts/http-api.md approve 404 (partial)
+- [X] T061 결제 생성 API의 400(금액 0 이하)을 contracts/http-api.md에 추가하고, `TestPaymentLabApplication`(`bootTestRun`)을 quickstart에 실행 방법으로 명시 per contracts POST /payments (unrequested)
+- [X] T062 plan·T041의 `Reconciler` 표기를 실제 구조(`PaymentApprovalService` 내부 메서드)에 맞게 고치기 per plan: structure (partial)
+- [X] T063 T011의 「컨테이너 재사용」 표기를 「Spring 테스트 컨텍스트 캐시로 한 번의 실행 안에서 공유」로 고치기 per T011 (partial)

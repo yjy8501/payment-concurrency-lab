@@ -51,8 +51,17 @@ class PgApprovalTest : IntegrationTest() {
         assertEquals(1, fakePg.approveCount(paymentNo), "PG 승인 요청 횟수 (SC-007)")
         assertEquals(1, stats.calls.count { it.status == 200 })
         assertEquals(9, stats.calls.count { it.status == 409 }, "나머지는 이미 요청됨으로 거절")
+        assertEquals(9, stats.count("ALREADY_REQUESTED"))
         assertEquals(PaymentStatus.APPROVED, statusOf(paymentNo))
         assertEquals(1, approvalCount(paymentNo))
+    }
+
+    @Test
+    fun `없는 결제에 승인을 요청하면 결제 없음으로 응답한다`() {
+        val response = caller.post("/payments/P-does-not-exist/approve", "{}")
+
+        assertEquals(404, response.status)
+        assertEquals("PAYMENT_NOT_FOUND", response.result)
     }
 
     @Test
@@ -63,6 +72,7 @@ class PgApprovalTest : IntegrationTest() {
         val again = caller.post("/payments/$paymentNo/approve", "{}")
 
         assertEquals(409, again.status)
+        assertEquals("ALREADY_REQUESTED", again.result)
         assertEquals(1, approvalCount(paymentNo))
     }
 }

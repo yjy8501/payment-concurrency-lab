@@ -20,7 +20,8 @@ class CallbackController(strategies: List<CallbackStrategy>) {
         @RequestBody request: CallbackRequest,
     ): ResponseEntity<CallbackResponse> {
         val handler = strategies[strategy]
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "unknown strategy: $strategy")
+            // 404는 「결제 없음」에 쓰므로, 잘못된 방식 이름은 400으로 구분한다
+            ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "unknown strategy: $strategy")
         val result = handler.handle(request)
         return ResponseEntity.status(result.httpStatus).body(CallbackResponse(result))
     }

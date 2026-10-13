@@ -11,11 +11,11 @@ Kotlin · Spring Boot 4.1 · PostgreSQL 17 · Redis 7 · Testcontainers · JUnit
 
 | 방식 | 승인 기록 수 | 중복 승인 발생 | 이미 처리됨 (평균) | 오류 (평균) | 전체 처리 시간 (평균) | 평균 응답 시간 |
 |---|---|---|---|---|---|---|
-| ① 조회 후 저장 | 12~27건 | 10 / 10회 | 81.6 | 0.0 | 25 ms | 13.8 ms |
-| ② 버전 충돌 감지 | 1건 | 0 / 10회 | 78.9 | 20.1 | 24 ms | 8.2 ms |
-| ③ 만료 잠금 (Redis) | 1건 | 0 / 10회 | 1.9 | 97.1 | 13 ms | 4.5 ms |
-| **④ 조건부 전이 + 유일 제약** | **1건** | **0 / 10회** | **99.0** | **0.0** | 21 ms | 13.0 ms |
-| ⑤ 행 잠금 | 1건 | 0 / 10회 | 99.0 | 0.0 | 27 ms | 14.4 ms |
+| ① 조회 후 저장 | 13~32건 | 10 / 10회 | 81.8 | 0.0 | 25 ms | 7.4 ms |
+| ② 버전 충돌 감지 | 1건 | 0 / 10회 | 79.4 | 19.6 | 20 ms | 6.7 ms |
+| ③ 만료 잠금 (Redis) | 1건 | 0 / 10회 | 1.8 | 97.2 | 11 ms | 6.3 ms |
+| **④ 조건부 전이 + 유일 제약** | **1건** | **0 / 10회** | **99.0** | **0.0** | 23 ms | 10.7 ms |
+| ⑤ 행 잠금 | 1건 | 0 / 10회 | 99.0 | 0.0 | 29 ms | 15.0 ms |
 
 측정 환경: macOS 15.6 (Apple Silicon, 12코어), Java 21, PostgreSQL 17·Redis 7 (Testcontainers).
 처리 시간은 참고값이며 방식 간 상대 비교에만 쓴다. `./gradlew comparison`으로 같은 표를 다시 만들 수 있다.
@@ -51,11 +51,13 @@ UPDATE payment
 PG에 승인을 요청하기 전에 결제를 「승인 요청 중」으로 먼저 바꾼다(같은 조건부 전이). 승인 요청이 동시에 여러 번 와도
 PG에는 1번만 나간다. PG 호출은 DB 트랜잭션으로 되돌릴 수 없어서, 호출 전에 막아야 한다.
 
-승인 요청에 3초 안에 응답이 없으면 결과를 모르는 상태로 보고 거래조회로 확정한다.
+승인 요청에 3초 안에 응답이 없거나 호출이 오류로 끝나면 결과를 모르는 상태로 보고 거래조회로 확정한다.
 
 | 상황 | 결과 |
 |---|---|
 | 같은 결제에 승인 요청이 동시에 10번 옴 | PG 승인 요청 1번, 나머지 9번은 409 |
+| PG 응답이 3초 안에 늦게 옴 | 그 응답으로 확정 |
+| PG 호출이 오류로 끝남 | 결과 모름으로 보고 거래조회 |
 | 응답은 유실됐지만 PG는 실제로 승인함 | 거래조회 → 승인 확정 |
 | 응답이 유실됐고 PG도 승인하지 않음 | 거래조회 → 실패 확정 |
 | 대기 직후 1번 + 1초 간격 2번, 총 3번 조회해도 모름 | 「확인 필요」로 남김 (약 5초 안에 응답) |
@@ -82,8 +84,8 @@ JDK 21과 Docker만 있으면 된다. 컨테이너는 Testcontainers가 띄운�
 | 원칙 | [constitution.md](.specify/memory/constitution.md) — 실제 DB로 경쟁시킨다, 결과는 숫자로 증명한다 등 6개 원칙 |
 | 스펙 | [spec.md](specs/001-duplicate-payment-prevention/spec.md) — 사용자 시나리오, 요구사항 FR-001~013, 성공 기준 SC-001~007 |
 | 설계 | [plan.md](specs/001-duplicate-payment-prevention/plan.md), [research.md](specs/001-duplicate-payment-prevention/research.md), [data-model.md](specs/001-duplicate-payment-prevention/data-model.md), [API 계약](specs/001-duplicate-payment-prevention/contracts/http-api.md) |
-| 작업 목록 | [tasks.md](specs/001-duplicate-payment-prevention/tasks.md) — 53개 작업, 사용자 스토리별로 테스트 먼저 |
-| 구현·검증 | 테스트 51개. 스토리마다 실패하는 테스트를 먼저 쓰고 통과시킴 |
+| 작업 목록 | [tasks.md](specs/001-duplicate-payment-prevention/tasks.md) — 63개 작업(스펙 대조로 추가된 10개 포함), 사용자 스토리별로 테스트 먼저 |
+| 구현·검증 | 테스트 66개. 스토리마다 실패하는 테스트를 먼저 쓰고 통과시킴 |
 | 설계 결정 | [ADR 0001](docs/adr/0001-conditional-update-over-distributed-lock.md), [ADR 0002](docs/adr/0002-separate-unguarded-approval-table.md) |
 
 ## 구조

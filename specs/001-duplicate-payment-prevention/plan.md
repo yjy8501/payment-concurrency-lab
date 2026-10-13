@@ -69,7 +69,7 @@ src/main/kotlin/io/github/yjy8501/paymentlab/
 ├── approval/         # Approval, UnguardedApproval 엔티티와 저장소
 ├── callback/         # 콜백 API, CallbackStrategy 인터페이스, 결과 타입
 │   └── strategy/     # ReadThenSave, OptimisticLock, RedisLock, ConditionalUpdate, PessimisticLock
-├── pg/               # PgClient 인터페이스, FakePg, 승인 요청 + 거래조회(Reconciler)
+├── pg/               # PgClient 인터페이스, FakePg, 승인 요청 + 거래조회(PaymentApprovalService)
 └── support/          # 처리 지연·오류 주입(테스트용 훅), 공통 설정
 src/main/resources/
 ├── application.yml

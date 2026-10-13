@@ -8,6 +8,7 @@ import io.github.yjy8501.paymentlab.support.LabProperties
 import jakarta.annotation.PreDestroy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -68,13 +69,18 @@ class PaymentApprovalService(
         return ApprovalOutcome(paymentNo, status, resolvedBy)
     }
 
-    /** 응답 대기 시간 안에 답이 오면 그 결과를, 아니면 null(결과 모름)을 돌려준다 (FR-009) */
+    /**
+     * 응답 대기 시간 안에 답이 오면 그 결과를, 아니면 null(결과 모름)을 돌려준다 (FR-009).
+     * 호출이 오류로 끝난 경우도 PG가 승인했는지 알 수 없으므로 결과 모름으로 본다.
+     */
     private fun requestApproval(payment: Payment): PgApproveResult? {
         val call = pgExecutor.submit<PgApproveResult> { pg.approve(payment.paymentNo, payment.amount) }
         return try {
             call.get(settings.responseTimeout.toMillis(), TimeUnit.MILLISECONDS)
         } catch (e: TimeoutException) {
             call.cancel(true)
+            null
+        } catch (e: ExecutionException) {
             null
         }
     }
