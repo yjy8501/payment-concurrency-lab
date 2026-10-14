@@ -4,9 +4,10 @@ spec의 요구사항을 구현하기 위해 내린 기술 결정을 정리한다
 
 ## R1. 기술 스택 버전
 
-- **Decision**: Kotlin 2.4.21, Spring Boot 4.1.1, JDK 21, Gradle Kotlin DSL(Wrapper 포함),
+- **Decision**: Kotlin 2.3.21, Spring Boot 4.1.1, JDK 21, Gradle Kotlin DSL(Wrapper 포함),
   PostgreSQL 17, Redis 7, Testcontainers 2.0.5, JUnit 5.
-- **Rationale**: 2026-10 기준 각 프로젝트의 최신 안정 버전이다. Gradle Wrapper를 넣어 JDK와 Docker만
+- **Rationale**: 2026-10 기준 최신 안정 버전이다. Kotlin은 최신(2.4.x) 대신 Spring Initializr가 Spring Boot 4.1.1과 함께
+  쓰도록 지정한 2.3.21을 쓴다(공식 지원 조합). Gradle Wrapper를 넣어 JDK와 Docker만
   있으면 실행되게 한다(원칙: 기술 제약).
 - **Alternatives considered**: Spring Boot 3.5 — 오픈소스 지원 기간이 끝나 새 데모에 쓸 이유가 없다.
 
@@ -26,7 +27,7 @@ spec의 요구사항을 구현하기 위해 내린 기술 결정을 정리한다
 | ① 조회 후 저장 | 결제 조회 → 상태가 대기면 승인으로 변경 → 승인 기록 저장(한 트랜잭션) | `approval_unguarded` |
 | ② 버전 충돌 감지 | ①과 같은 흐름 + 결제 엔티티 `@Version`. 충돌 시 커밋 단계에서 예외 | `approval_unguarded` |
 | ③ 만료 잠금 | Redis `SET key token NX PX ttl`로 잠금 획득 → ① 흐름 실행 → 커밋 후 Lua로 「내 토큰일 때만 삭제」. TTL 기본 5초, 만료 실험에서는 0.1초 | `approval_unguarded` |
-| ④ 조건부 전이 + 유일 제약 | `UPDATE payment SET status='APPROVED' WHERE id=? AND status IN ('PENDING','NEEDS_REVIEW')` 결과가 1행일 때만 승인 기록 저장. 0행이면 「이미 처리됨」 | `approval` (결제당 유일 제약) |
+| ④ 조건부 전이 + 유일 제약 | `UPDATE payment SET status='APPROVED' WHERE id=? AND status IN ('PENDING','REQUESTING','NEEDS_REVIEW')` 결과가 1행일 때만 승인 기록 저장. 0행이면 「이미 처리됨」 | `approval` (결제당 유일 제약) |
 | ⑤ 행 잠금 | `SELECT ... FOR UPDATE`(JPA `@Lock(PESSIMISTIC_WRITE)`)로 결제를 잠가 읽음 → 대기면 승인 → 승인 기록 저장. 다른 요청은 커밋까지 기다린 뒤 최신 상태를 읽음 | `approval_unguarded` |
 
 - **Rationale**:
@@ -74,7 +75,9 @@ spec의 요구사항을 구현하기 위해 내린 기술 결정을 정리한다
 
 ## R8. 거래조회 실행 방식
 
-- **Decision**: 승인 요청이 타임아웃되면 같은 요청 흐름 안에서 바로 1번째 거래조회를 하고, 결과가 없으면
+- **Decision**: PG를 호출하기 전에 조건부 전이 `PENDING → REQUESTING`으로 승인 요청 권리를 선점한다. 1행이 바뀐 요청만 PG를 호출하고,
+  0행이면 PG를 호출하지 않고 409로 거절한다(FR-013). PG 호출은 DB 트랜잭션으로 되돌릴 수 없으므로, 호출 전에 막아야 한다.
+  승인 요청이 타임아웃되면 같은 요청 흐름 안에서 바로 1번째 거래조회를 하고, 결과가 없으면
   1초 간격으로 2번 더(총 3번) 조회한다(동기 실행). 최악의 경우 승인 요청 후 약 5초 안에 확정된다.
   확정되면 ④와 같은 조건부 전이로 상태를 바꾸고, 끝까지 모르면 「확인 필요」로 바꾼다.
 - **Rationale**: 테스트에서 결과를 바로 확인할 수 있고, 스케줄러 없이도 spec의 시간 기준(SC-005)을 만족한다.

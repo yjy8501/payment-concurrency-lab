@@ -27,11 +27,11 @@ description: "Task list for 이중 결제 방지 실험"
 
 ## Phase 1: Setup (프로젝트 뼈대)
 
-- [ ] T001 Gradle Kotlin DSL 프로젝트와 Wrapper 생성: `settings.gradle.kts`, `build.gradle.kts`, `gradlew`, `gradle/wrapper/` (Kotlin 2.4.21, Spring Boot 4.1.1, JDK 21 toolchain)
-- [ ] T002 의존성 추가 in `build.gradle.kts`: Web MVC, Data JPA, Data Redis, Flyway(PostgreSQL), PostgreSQL 드라이버, Jackson Kotlin, 테스트용 Spring Boot Test·Testcontainers 2.0.5(PostgreSQL)·JUnit 5
-- [ ] T003 [P] `.gitignore` 작성 (build/, .gradle/, .idea/, `.claude/settings.local.json`)
-- [ ] T004 [P] 애플리케이션 진입점 생성 in `src/main/kotlin/io/github/yjy8501/paymentlab/PaymentLabApplication.kt`
-- [ ] T005 [P] 설정 파일 작성 in `src/main/resources/application.yml` (Hikari 풀 50, PG 대기 3초, 거래조회 간격 1초·총 3회, ③ 잠금 TTL 5초)
+- [X] T001 Gradle Kotlin DSL 프로젝트와 Wrapper 생성: `settings.gradle.kts`, `build.gradle.kts`, `gradlew`, `gradle/wrapper/` (Kotlin 2.3.21, Spring Boot 4.1.1, JDK 21 toolchain)
+- [X] T002 의존성 추가 in `build.gradle.kts`: Web MVC, Data JPA, Data Redis, Flyway(PostgreSQL), PostgreSQL 드라이버, Jackson Kotlin, 테스트용 Spring Boot Test·Testcontainers 2.0.5(PostgreSQL)·JUnit 5
+- [X] T003 [P] `.gitignore` 작성 (build/, .gradle/, .idea/, `.claude/settings.local.json`)
+- [X] T004 [P] 애플리케이션 진입점 생성 in `src/main/kotlin/io/github/yjy8501/paymentlab/PaymentLabApplication.kt`
+- [X] T005 [P] 설정 파일 작성 in `src/main/resources/application.yml` (Hikari 풀 50, PG 대기 3초, 거래조회 간격 1초·총 3회, ③ 잠금 TTL 5초)
 
 ---
 
@@ -39,14 +39,14 @@ description: "Task list for 이중 결제 방지 실험"
 
 **이 단계가 끝나야 사용자 스토리 작업을 시작할 수 있다**
 
-- [ ] T006 Flyway 마이그레이션 작성 in `src/main/resources/db/migration/V1__init.sql`: `payment`(payment_no varchar(40) UNIQUE, amount bigint > 0, status varchar(20) `PENDING`·`APPROVED`·`FAILED`·`NEEDS_REVIEW`, version bigint), `approval`(payment_id **UNIQUE** FK, pg_tx_id varchar(40), amount, approved_at), `approval_unguarded`(같은 열, 유일 제약 없음)
-- [ ] T007 [P] `PaymentStatus` enum과 `Payment` 엔티티 in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/Payment.kt`
-- [ ] T008 [P] `Approval`, `UnguardedApproval` 엔티티와 저장소 in `src/main/kotlin/io/github/yjy8501/paymentlab/approval/`
-- [ ] T009 `PaymentRepository` (결제 번호로 조회, 조건부 전이 `UPDATE ... WHERE id = ? AND status IN ('PENDING','NEEDS_REVIEW')`) in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentRepository.kt`
-- [ ] T010 결제 생성 API `POST /payments` in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentController.kt`
-- [ ] T011 [P] Testcontainers 공통 설정(PostgreSQL 17·Redis 7, `@ServiceConnection`, 컨테이너 재사용) in `src/test/kotlin/io/github/yjy8501/paymentlab/support/TestContainersConfig.kt`
-- [ ] T012 [P] 동시 요청 실행기 `ConcurrentCaller` (N개 요청을 `CountDownLatch`로 동시 출발, 응답 종류별 개수·전체 처리 시간·평균 응답 시간 집계) in `src/test/kotlin/io/github/yjy8501/paymentlab/support/ConcurrentCaller.kt`
-- [ ] T013 기반 동작 확인 테스트 (컨테이너 기동, 마이그레이션, 결제 생성) in `src/test/kotlin/io/github/yjy8501/paymentlab/payment/PaymentCreationTest.kt`
+- [X] T006 Flyway 마이그레이션 작성 in `src/main/resources/db/migration/V1__init.sql`: `payment`(payment_no varchar(40) UNIQUE, amount bigint > 0, status varchar(20) `PENDING`·`APPROVED`·`FAILED`·`NEEDS_REVIEW`, version bigint), `approval`(payment_id **UNIQUE** FK, pg_tx_id varchar(40), amount, approved_at), `approval_unguarded`(같은 열, 유일 제약 없음)
+- [X] T007 [P] `PaymentStatus` enum과 `Payment` 엔티티 in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/Payment.kt`
+- [X] T008 [P] `Approval`, `UnguardedApproval` 엔티티와 저장소 in `src/main/kotlin/io/github/yjy8501/paymentlab/approval/`
+- [X] T009 `PaymentRepository` (결제 번호로 조회, 조건부 전이 `UPDATE ... WHERE id = ? AND status IN ('PENDING','NEEDS_REVIEW')`) in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentRepository.kt`
+- [X] T010 결제 생성 API `POST /payments` in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentController.kt`
+- [X] T011 [P] Testcontainers 공통 설정(PostgreSQL 17·Redis 7, `@ServiceConnection`, Spring 테스트 컨텍스트 캐시로 한 번의 실행 안에서 컨테이너 공유) in `src/test/kotlin/io/github/yjy8501/paymentlab/support/TestContainersConfig.kt`
+- [X] T012 [P] 동시 요청 실행기 `ConcurrentCaller` (N개 요청을 `CountDownLatch`로 동시 출발, 응답 종류별 개수·전체 처리 시간·평균 응답 시간 집계) in `src/test/kotlin/io/github/yjy8501/paymentlab/support/ConcurrentCaller.kt`
+- [X] T013 기반 동작 확인 테스트 (컨테이너 기동, 마이그레이션, 결제 생성) in `src/test/kotlin/io/github/yjy8501/paymentlab/payment/PaymentCreationTest.kt`
 
 **Checkpoint**: `./gradlew test`로 컨테이너가 뜨고 결제를 만들 수 있다
 
@@ -60,16 +60,16 @@ description: "Task list for 이중 결제 방지 실험"
 
 ### Tests for User Story 1
 
-- [ ] T014 [P] [US1] 동시성 테스트: 100개 동시 알림 × 10회 반복, 매회 승인 1건·「이미 처리됨」 99개·오류 0개 (SC-001·002) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/ConditionalUpdateConcurrencyTest.kt`
-- [ ] T015 [P] [US1] 엣지 케이스 테스트: 이미 승인된 결제 재알림, 없는 결제(404 `PAYMENT_NOT_FOUND`), 금액 불일치(422 `AMOUNT_MISMATCH`), 승인·실패 알림 동시 도착 시 결과 하나만 반영, 「확인 필요」 결제의 승인 in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/CallbackEdgeCaseTest.kt`
-- [ ] T016 [P] [US1] 반쪽 반영 없음 테스트: 「상태 변경 후, 승인 기록 저장 전」에 오류를 주입하면 결제 상태와 승인 기록이 둘 다 바뀌지 않음 (FR-006, research R10) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/AtomicityTest.kt`
+- [X] T014 [P] [US1] 동시성 테스트: 100개 동시 알림 × 10회 반복, 매회 승인 1건·「이미 처리됨」 99개·오류 0개 (SC-001·002) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/ConditionalUpdateConcurrencyTest.kt`
+- [X] T015 [P] [US1] 엣지 케이스 테스트: 이미 승인된 결제 재알림, 없는 결제(404 `PAYMENT_NOT_FOUND`), 금액 불일치(422 `AMOUNT_MISMATCH`), 승인·실패 알림 동시 도착 시 결과 하나만 반영, 「확인 필요」 결제의 승인 in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/CallbackEdgeCaseTest.kt`
+- [X] T016 [P] [US1] 반쪽 반영 없음 테스트: 「상태 변경 후, 승인 기록 저장 전」에 오류를 주입하면 결제 상태와 승인 기록이 둘 다 바뀌지 않음 (FR-006, research R10) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/AtomicityTest.kt`
 
 ### Implementation for User Story 1
 
-- [ ] T017 [P] [US1] 콜백 요청·결과 타입 (`CallbackRequest`, `CallbackResult`: `APPROVED`·`FAILED`·`ALREADY_PROCESSED`·`PAYMENT_NOT_FOUND`·`AMOUNT_MISMATCH`·`CONFLICT`)과 `CallbackStrategy` 인터페이스 in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/CallbackStrategy.kt`
-- [ ] T018 [P] [US1] 테스트용 오류 주입 훅 `FailureInjector` (기본 꺼짐, 테스트에서 지정한 지점에서 예외 발생) in `src/main/kotlin/io/github/yjy8501/paymentlab/support/FailureInjector.kt`
-- [ ] T019 [US1] 방식 ④ `ConditionalUpdateStrategy` (조건부 전이 1행일 때만 `approval` 저장, 0행이면 `ALREADY_PROCESSED`, 한 트랜잭션, 오류 주입 지점 포함) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/ConditionalUpdateStrategy.kt`
-- [ ] T020 [US1] 콜백 API `POST /callbacks/{strategy}` (결과 → HTTP 상태 매핑은 contracts/http-api.md 표 그대로) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/CallbackController.kt`
+- [X] T017 [P] [US1] 콜백 요청·결과 타입 (`CallbackRequest`, `CallbackResult`: `APPROVED`·`FAILED`·`ALREADY_PROCESSED`·`PAYMENT_NOT_FOUND`·`AMOUNT_MISMATCH`·`CONFLICT`)과 `CallbackStrategy` 인터페이스 in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/CallbackStrategy.kt`
+- [X] T018 [P] [US1] 테스트용 오류 주입 훅 `FailureInjector` (기본 꺼짐, 테스트에서 지정한 지점에서 예외 발생) in `src/main/kotlin/io/github/yjy8501/paymentlab/support/FailureInjector.kt`
+- [X] T019 [US1] 방식 ④ `ConditionalUpdateStrategy` (조건부 전이 1행일 때만 `approval` 저장, 0행이면 `ALREADY_PROCESSED`, 한 트랜잭션, 오류 주입 지점 포함) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/ConditionalUpdateStrategy.kt`. 확정 로직은 US3와 함께 쓰도록 `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentSettler.kt`로 분리
+- [X] T020 [US1] 콜백 API `POST /callbacks/{strategy}` (결과 → HTTP 상태 매핑은 contracts/http-api.md 표 그대로) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/CallbackController.kt`
 
 **Checkpoint**: US1 테스트 통과 = MVP 완성
 
@@ -83,23 +83,23 @@ description: "Task list for 이중 결제 방지 실험"
 
 ### Tests for User Story 2
 
-- [ ] T021 [P] [US2] 방식 ① 중복 재현 테스트: 10회 중 1회 이상 승인 기록 2건 이상 (US2-2, SC-004) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/ReadThenSaveConcurrencyTest.kt`
-- [ ] T022 [P] [US2] 방식 ② 테스트: 매회 승인 1건, 오류(409 `CONFLICT`) 1개 이상 (US2-3) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/OptimisticLockConcurrencyTest.kt`
-- [ ] T023 [P] [US2] 방식 ③ TTL 만료 테스트: TTL 0.1초 + 처리 지연이 TTL보다 길 때 승인 기록 2건 이상 (US2-4, SC-004) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/RedisLockExpiryTest.kt`
-- [ ] T024 [P] [US2] 방식 ⑤ 테스트: 10회 모두 승인 1건·「이미 처리됨」 99개·오류 0개 (US2-5, SC-006) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/PessimisticLockConcurrencyTest.kt`
+- [X] T021 [P] [US2] 방식 ① 중복 재현 테스트: 10회 중 1회 이상 승인 기록 2건 이상 (US2-2, SC-004) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/ReadThenSaveConcurrencyTest.kt`
+- [X] T022 [P] [US2] 방식 ② 테스트: 매회 승인 1건, 오류(409 `CONFLICT`) 1개 이상 (US2-3) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/OptimisticLockConcurrencyTest.kt`
+- [X] T023 [P] [US2] 방식 ③ TTL 만료 테스트: TTL 0.1초 + 처리 지연이 TTL보다 길 때 승인 기록 2건 이상 (US2-4, SC-004) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/RedisLockExpiryTest.kt`
+- [X] T024 [P] [US2] 방식 ⑤ 테스트: 10회 모두 승인 1건·「이미 처리됨」 99개·오류 0개 (US2-5, SC-006) in `src/test/kotlin/io/github/yjy8501/paymentlab/callback/PessimisticLockConcurrencyTest.kt`
 
 ### Implementation for User Story 2
 
-- [ ] T025 [P] [US2] 테스트용 처리 지연 훅 `ProcessingDelay` (기본 0ms, 테스트에서 설정) in `src/main/kotlin/io/github/yjy8501/paymentlab/support/ProcessingDelay.kt`
-- [ ] T026 [P] [US2] 방식 ① `ReadThenSaveStrategy` (조회 → 대기면 승인 → `approval_unguarded` 저장) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/ReadThenSaveStrategy.kt`
-- [ ] T027 [P] [US2] `VersionedPayment` 엔티티(`@Version`, 같은 `payment` 테이블)와 저장소 in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/VersionedPayment.kt`
-- [ ] T028 [US2] 방식 ② `OptimisticLockStrategy` (충돌 예외 → `CONFLICT`, 재시도 없음) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/OptimisticLockStrategy.kt`
-- [ ] T029 [P] [US2] Redis 잠금 `ExpiringLock` (`SET NX PX`로 획득, Lua로 「내 토큰일 때만 삭제」) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/ExpiringLock.kt`
-- [ ] T030 [US2] 방식 ③ `RedisLockStrategy` (잠금 실패 → 대기 없이 `CONFLICT`, 커밋 후 잠금 해제) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/RedisLockStrategy.kt`
-- [ ] T031 [US2] `PaymentRepository`에 잠금 조회 추가 (`@Lock(PESSIMISTIC_WRITE)`, `SELECT ... FOR UPDATE`) in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentRepository.kt`
-- [ ] T032 [US2] 방식 ⑤ `PessimisticLockStrategy` (잠가서 조회 → 대기면 승인 → `approval_unguarded` 저장, 이미 처리됐으면 `ALREADY_PROCESSED`) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/PessimisticLockStrategy.kt`
-- [ ] T033 [US2] 비교표 생성 테스트 `StrategyComparisonTest` (예열 1회 후 5방식 × 10회, 열: 승인 기록 수·이미 처리됨·오류·전체 처리 시간·평균 응답 시간, 측정 환경 기록 → `build/reports/comparison.md`) in `src/test/kotlin/io/github/yjy8501/paymentlab/comparison/StrategyComparisonTest.kt`
-- [ ] T034 [US2] Gradle `comparison` 태스크 등록 (기본 `test`에서는 비교표 테스트 제외) in `build.gradle.kts`
+- [X] T025 [P] [US2] 테스트용 처리 지연 훅 `ProcessingDelay` (기본 0ms, 테스트에서 설정) in `src/main/kotlin/io/github/yjy8501/paymentlab/support/ProcessingDelay.kt`
+- [X] T026 [P] [US2] 방식 ① `ReadThenSaveStrategy` (조회 → 대기면 승인 → `approval_unguarded` 저장) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/ReadThenSaveStrategy.kt`
+- [X] T027 [P] [US2] `VersionedPayment` 엔티티(`@Version`, 같은 `payment` 테이블)와 저장소 in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/VersionedPayment.kt`
+- [X] T028 [US2] 방식 ② `OptimisticLockStrategy` (충돌 예외 → `CONFLICT`, 재시도 없음) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/OptimisticLockStrategy.kt`
+- [X] T029 [P] [US2] Redis 잠금 `ExpiringLock` (`SET NX PX`로 획득, Lua로 「내 토큰일 때만 삭제」) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/ExpiringLock.kt`
+- [X] T030 [US2] 방식 ③ `RedisLockStrategy` (잠금 실패 → 대기 없이 `CONFLICT`, 커밋 후 잠금 해제) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/RedisLockStrategy.kt`
+- [X] T031 [US2] `PaymentRepository`에 잠금 조회 추가 (`@Lock(PESSIMISTIC_WRITE)`, `SELECT ... FOR UPDATE`) in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentRepository.kt`
+- [X] T032 [US2] 방식 ⑤ `PessimisticLockStrategy` (잠가서 조회 → 대기면 승인 → `approval_unguarded` 저장, 이미 처리됐으면 `ALREADY_PROCESSED`) in `src/main/kotlin/io/github/yjy8501/paymentlab/callback/strategy/PessimisticLockStrategy.kt`
+- [X] T033 [US2] 비교표 생성 테스트 `StrategyComparisonTest` (예열 1회 후 5방식 × 10회, 열: 승인 기록 수·이미 처리됨·오류·전체 처리 시간·평균 응답 시간, 측정 환경 기록 → `build/reports/comparison.md`) in `src/test/kotlin/io/github/yjy8501/paymentlab/comparison/StrategyComparisonTest.kt`
+- [X] T034 [US2] Gradle `comparison` 태스크 등록 (기본 `test`에서는 비교표 테스트 제외) in `build.gradle.kts`
 
 **Checkpoint**: `./gradlew comparison`으로 비교표가 생성된다
 
@@ -113,17 +113,17 @@ description: "Task list for 이중 결제 방지 실험"
 
 ### Tests for User Story 3
 
-- [ ] T035 [P] [US3] PG 정상 응답 테스트: 바로 승인 → `APPROVED`(`PG_RESPONSE`), 바로 실패 → `FAILED`(`PG_RESPONSE`) (US3-1·2) in `src/test/kotlin/io/github/yjy8501/paymentlab/pg/PgApprovalTest.kt`
-- [ ] T036 [P] [US3] 타임아웃·거래조회 테스트: 조회 결과 승인 → `APPROVED`(`INQUIRY`), 실패 → `FAILED`, 3회 모두 결과 없음 → `NEEDS_REVIEW`(`UNRESOLVED`), 승인 요청 후 약 5초 안에 확정 (US3-3~5, SC-005) in `src/test/kotlin/io/github/yjy8501/paymentlab/pg/PgTimeoutReconciliationTest.kt`
-- [ ] T037 [P] [US3] 거래조회 중 승인 알림 동시 도착 → 승인 기록 1건 (US3-6) in `src/test/kotlin/io/github/yjy8501/paymentlab/pg/ReconcileWithCallbackRaceTest.kt`
+- [X] T035 [P] [US3] PG 정상 응답 테스트: 바로 승인 → `APPROVED`(`PG_RESPONSE`), 바로 실패 → `FAILED`(`PG_RESPONSE`) (US3-1·2) in `src/test/kotlin/io/github/yjy8501/paymentlab/pg/PgApprovalTest.kt`
+- [X] T036 [P] [US3] 타임아웃·거래조회 테스트: 조회 결과 승인 → `APPROVED`(`INQUIRY`), 실패 → `FAILED`, 3회 모두 결과 없음 → `NEEDS_REVIEW`(`UNRESOLVED`), 승인 요청 후 약 5초 안에 확정 (US3-3~5, SC-005) in `src/test/kotlin/io/github/yjy8501/paymentlab/pg/PgTimeoutReconciliationTest.kt`
+- [X] T037 [P] [US3] 거래조회 중 승인 알림 동시 도착 → 승인 기록 1건 (US3-6) in `src/test/kotlin/io/github/yjy8501/paymentlab/pg/ReconcileWithCallbackRaceTest.kt`
 
 ### Implementation for User Story 3
 
-- [ ] T038 [P] [US3] `PgClient` 인터페이스와 결과 타입(`PgApproveResult`, `InquiryResult`: `APPROVED(pgTxId)`·`FAILED`·`NOT_FOUND`) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PgClient.kt`
-- [ ] T039 [P] [US3] `FakePg` (시나리오 설정: 바로 승인·바로 실패·지연·유실, 「응답은 유실됐지만 실제 승인됨」 기억, 거래조회 결과) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/FakePg.kt`
-- [ ] T040 [US3] 상태 확정 로직을 ④의 조건부 전이로 통일한 `PaymentResolver` (승인·실패·확인 필요 반영) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PaymentResolver.kt`
-- [ ] T041 [US3] `PaymentApprovalService` (3초 타임아웃 → `Reconciler`로 즉시 1회 + 1초 간격 2회 조회) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PaymentApprovalService.kt`
-- [ ] T042 [US3] 승인 요청 API `POST /payments/{paymentNo}/approve` in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PaymentApprovalController.kt`
+- [X] T038 [P] [US3] `PgClient` 인터페이스와 결과 타입(`PgApproveResult`, `InquiryResult`: `APPROVED(pgTxId)`·`FAILED`·`NOT_FOUND`) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PgClient.kt`
+- [X] T039 [P] [US3] `FakePg` (시나리오 설정: 바로 승인·바로 실패·지연·유실, 「응답은 유실됐지만 실제 승인됨」 기억, 거래조회 결과) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/FakePg.kt`
+- [X] T040 [US3] 상태 확정 로직을 ④의 조건부 전이로 통일: T019에서 만든 `PaymentSettler`(승인·실패·확인 필요 반영)를 PG 승인 흐름에서 그대로 사용 in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentSettler.kt`
+- [X] T041 [US3] `PaymentApprovalService` (3초 타임아웃 → 서비스 내부 `reconcile`로 즉시 1회 + 1초 간격 2회 조회) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PaymentApprovalService.kt`
+- [X] T042 [US3] 승인 요청 API `POST /payments/{paymentNo}/approve` in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PaymentApprovalController.kt`
 
 **Checkpoint**: 세 스토리의 테스트가 모두 통과한다
 
@@ -131,11 +131,34 @@ description: "Task list for 이중 결제 방지 실험"
 
 ## Phase 6: Polish (문서와 마무리)
 
-- [ ] T043 [P] ADR 작성: 왜 분산 락이 아니라 조건부 전이 + 유일 제약인가 (대안: 조회 후 저장·낙관적 락·Redis 잠금·행 잠금, 채택 근거, 기각 사유, 비교표의 정확성·처리 시간 인용) in `docs/adr/0001-conditional-update-over-distributed-lock.md`
-- [ ] T044 [P] ADR 작성: 승인 기록 테이블을 둘로 나눈 이유 in `docs/adr/0002-separate-unguarded-approval-table.md`
-- [ ] T045 README 작성: 한 줄 소개, 결과 표(`comparison.md`에서 옮김, 측정 환경 포함), 실행 방법, SDD 진행 과정(spec → plan → tasks → 구현 → 대조) 링크 in `README.md`
-- [ ] T046 quickstart.md 절차대로 전체 실행해 결과 확인 (`./gradlew test`, `./gradlew comparison`)
-- [ ] T047 회사 식별자·내부 정보가 없는지 전체 검색으로 확인 (원칙 V)
+- [X] T043 [P] ADR 작성: 왜 분산 락이 아니라 조건부 전이 + 유일 제약인가 (대안: 조회 후 저장·낙관적 락·Redis 잠금·행 잠금, 채택 근거, 기각 사유, 비교표의 정확성·처리 시간 인용) in `docs/adr/0001-conditional-update-over-distributed-lock.md`
+- [X] T044 [P] ADR 작성: 승인 기록 테이블을 둘로 나눈 이유 in `docs/adr/0002-separate-unguarded-approval-table.md`
+- [X] T045 README 작성: 한 줄 소개, 결과 표(`comparison.md`에서 옮김, 측정 환경 포함), 실행 방법, SDD 진행 과정(spec → plan → tasks → 구현 → 대조) 링크 in `README.md`
+- [X] T046 quickstart.md 절차대로 전체 실행해 결과 확인 (`./gradlew test`, `./gradlew comparison`)
+- [X] T047 회사 식별자·내부 정보가 없는지 전체 검색으로 확인 (원칙 V)
+
+---
+
+## Phase 7: 추가 요구사항 - 승인 요청 중복 방지 (FR-013)
+
+**배경**: 문서 검토 중 발견. 승인 요청 API가 「대기 상태 확인 → PG 호출」 순서라, 같은 결제에 승인 요청이 동시에 오면
+PG에 여러 번 요청이 나갈 수 있었다. PG 호출은 DB 트랜잭션으로 되돌릴 수 없으므로 호출 전에 선점해야 한다.
+
+**Independent Test**: 같은 결제에 승인 요청 10개를 동시에 보내면 PG 승인 요청은 1번, 승인 기록은 1건
+
+### Tests
+
+- [X] T048 [P] [US3] `FakePg`에 결제별 승인 요청 횟수 기록 (`approveCount`) in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/FakePg.kt`
+- [X] T049 [US3] 동시 승인 요청 테스트: 10개 동시 → PG 승인 요청 1번, 200 1개·409 9개, 승인 기록 1건 (US3-7, SC-007) in `src/test/kotlin/io/github/yjy8501/paymentlab/pg/PgApprovalTest.kt`
+
+### Implementation
+
+- [X] T050 [US3] Flyway 마이그레이션: `payment.status` 체크 제약에 `REQUESTING` 추가 in `src/main/resources/db/migration/V2__add_requesting_status.sql`
+- [X] T051 [US3] `PaymentStatus`에 `REQUESTING` 추가, 전이 규칙을 FR-002에 맞게 갱신 in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/Payment.kt`
+- [X] T052 [US3] `PaymentSettler`에 선점(`PENDING → REQUESTING`) 추가, 「확인 필요」 전이의 출발 상태를 `REQUESTING`으로 변경 in `src/main/kotlin/io/github/yjy8501/paymentlab/payment/PaymentSettler.kt`
+- [X] T053 [US3] `PaymentApprovalService`: 상태 조회 대신 선점에 성공한 요청만 PG 호출, 실패하면 409 in `src/main/kotlin/io/github/yjy8501/paymentlab/pg/PaymentApprovalService.kt`
+
+**Checkpoint**: 전체 테스트 통과, 이후 T046(전체 재실행) 다시 수행
 
 ---
 
@@ -185,3 +208,20 @@ T029 ExpiringLock
 5. Polish → ADR, README
 
 각 단계를 별도 커밋으로 남긴다(원칙: 개발 흐름).
+
+---
+
+## Phase 8: Convergence
+
+독립 검토자가 spec·plan·tasks와 코드를 대조해 찾은 남은 작업 (CRITICAL 0, HIGH 0, MEDIUM 2, LOW 8)
+
+- [X] T054 `FakePg`에 「지정한 시간 뒤 응답」 모드를 추가하고, 3초 안 응답은 `PG_RESPONSE`, 3초를 넘긴 응답은 `INQUIRY`로 확정되는지 테스트 per FR-012 (partial)
+- [X] T055 방식 ③을 기본 TTL로 100개 동시 × 10회 실행해 매회 승인 1건·`CONFLICT` 1개 이상인지 확인하는 단언 추가, 방식 ②도 비교표 테스트에서 함께 단언 per US2 표 ③·US2/AC3 (partial)
+- [X] T056 PG 승인 호출이 예외로 끝나면(`ExecutionException`) 「결과 모름」으로 보고 거래조회를 진행해, 결제가 `REQUESTING`에 남지 않게 하기. 가짜 PG에 예외 응답 모드와 테스트 추가 per SC-005 (partial)
+- [X] T057 spec의 FR-004·FR-005·Edge Cases가 「채택 방식(④)과 PG 승인 흐름」에 적용된다고 범위를 명확히 하기. ①②③은 비교를 위해 일부러 위반하는 방식임을 명시 per FR-004·FR-005 (contradicts, spec ambiguity)
+- [X] T058 승인 요청 409 응답에 `ALREADY_REQUESTED` 결과 코드를 넣고 테스트에서 확인 per US3/AC7 (partial)
+- [X] T059 알 수 없는 `{strategy}`는 404 대신 400으로 응답해 「결제 없음(404)」과 구분 per contracts/http-api.md (contradicts)
+- [X] T060 없는 결제에 승인 요청하면 404인지 확인하는 테스트 추가 per contracts/http-api.md approve 404 (partial)
+- [X] T061 결제 생성 API의 400(금액 0 이하)을 contracts/http-api.md에 추가하고, `TestPaymentLabApplication`(`bootTestRun`)을 quickstart에 실행 방법으로 명시 per contracts POST /payments (unrequested)
+- [X] T062 plan·T041의 `Reconciler` 표기를 실제 구조(`PaymentApprovalService` 내부 메서드)에 맞게 고치기 per plan: structure (partial)
+- [X] T063 T011의 「컨테이너 재사용」 표기를 「Spring 테스트 컨텍스트 캐시로 한 번의 실행 안에서 공유」로 고치기 per T011 (partial)

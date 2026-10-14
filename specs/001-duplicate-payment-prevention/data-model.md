@@ -7,7 +7,7 @@
 | id | bigint, PK | 자동 증가 |
 | payment_no | varchar(40), UNIQUE | 외부에 노출되는 결제 번호. PG 알림이 이 값으로 결제를 찾는다 |
 | amount | bigint | 원 단위, 0보다 커야 한다 |
-| status | varchar(20) | `PENDING` · `APPROVED` · `FAILED` · `NEEDS_REVIEW` |
+| status | varchar(20) | `PENDING` · `REQUESTING` · `APPROVED` · `FAILED` · `NEEDS_REVIEW` |
 | version | bigint | 방식 ②에서만 사용(`VersionedPayment`) |
 | created_at / updated_at | timestamptz | |
 
@@ -16,15 +16,17 @@
 ### 상태 전이 (FR-002)
 
 ```text
-PENDING ──승인──▶ APPROVED
-   │  └──실패──▶ FAILED
-   └──조회 3회 실패──▶ NEEDS_REVIEW ──승인──▶ APPROVED
-                              └──실패──▶ FAILED
+PENDING ──승인 요청 선점──▶ REQUESTING ──조회 3회 실패──▶ NEEDS_REVIEW
+   │                          │                           │
+   └──────────────────────────┴───────────────────────────┴──승인──▶ APPROVED
+                                                           └──실패──▶ FAILED
 ```
 
+- `PENDING`·`REQUESTING`·`NEEDS_REVIEW`는 아직 확정 전 상태다. 이 상태의 결제에 온 승인·실패 알림은 반영한다.
 - `APPROVED`, `FAILED`는 최종 상태다. 최종 상태에 도착한 알림은 「이미 처리됨」으로 응답한다.
+- `REQUESTING`은 PG 승인 요청을 보낼 권리를 선점한 상태다. `PENDING → REQUESTING`에 성공한 요청만 PG를 호출한다 (FR-013).
 - 방식 ④와 US3의 상태 변경은 조건부 UPDATE로만 한다:
-  `... WHERE id = ? AND status IN ('PENDING', 'NEEDS_REVIEW')`
+  `... WHERE id = ? AND status IN ('PENDING', 'REQUESTING', 'NEEDS_REVIEW')`
 
 ## approval (승인 기록, 방식 ④ · US3)
 
